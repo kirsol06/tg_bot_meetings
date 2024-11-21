@@ -27,6 +27,7 @@ def add_meeting(title: str, start_time: str, end_time: str, description: str, us
         if user:
             user_id = user[0]
             cursor.execute('INSERT INTO participants (meeting_id, user_id) VALUES (?, ?)', (meeting_id, user_id))
+            send_meeting_notification(user_id, title, start_time, end_time, description)
     conn.commit()
 
 def get_all_meetings():
@@ -50,6 +51,17 @@ def get_all_meetings():
         all_meetings.append((meeting_id, title, start_time, end_time, description, participants_list))
 
     return all_meetings
+
+def send_meeting_notification(user_id, title, start_time, end_time, description):
+    message = (
+        f"🔥 Вам назначена новая встреча!\n"
+        f"Название:   {title}\n"
+        f"Дата и время начала:   {start_time}\n"
+        f"Дата и время окончания:   {end_time}\n"
+        f"Описание:   {description}\n"
+    )
+    bot.send_message(user_id, message)
+
 
 def get_meetings_for_user(user_id):
     # Получаем все встречи для конкретного пользователя
