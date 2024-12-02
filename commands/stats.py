@@ -1,9 +1,8 @@
 import sqlite3
 import io
 import datetime
-
-# Установка бекенда для Matplotlib
 import matplotlib
+
 matplotlib.use('Agg')  # Используем бекенд без GUI
 import matplotlib.pyplot as plt
 
