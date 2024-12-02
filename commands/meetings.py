@@ -1,4 +1,5 @@
 from .utils import  add_meeting, get_meetings_for_user, find_next_free_slot, all_usernames_exist, users_are_free, get_db_connection, delete_meeting_handler
+from .help import create_keyboard
 import datetime
 
 def set_schedule_meeting(bot, message):
@@ -8,6 +9,10 @@ def set_schedule_meeting(bot, message):
 
 def process_start_time(bot, message):
     """Обработка времени начала встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     try:
         start_time_str = message.text.strip()
         start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M")
@@ -22,6 +27,10 @@ def process_start_time(bot, message):
 
 def process_end_time(bot, message, start_time):
     """Обработка времени окончания встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     try:
         end_time_str = message.text.strip()
         end_time = datetime.datetime.strptime(end_time_str, "%H:%M")
@@ -44,6 +53,10 @@ def process_end_time(bot, message, start_time):
 
 def process_usernames(bot, message, start_time, end_time):
     """Обработка юзернеймов участников встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     usernames = [name.strip() for name in message.text.split(',')]
     
     # Проверка наличия юзернеймов в базе данных
@@ -66,6 +79,10 @@ def process_usernames(bot, message, start_time, end_time):
 
 def process_meeting_title(bot, message, start_time, end_time, usernames):
     """Обработка названия встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     title = message.text.strip()
 
     # Запрашиваем описание встречи
@@ -74,6 +91,10 @@ def process_meeting_title(bot, message, start_time, end_time, usernames):
 
 def save_meeting(bot, message, title, start_time, end_time, usernames):
     """Сохранение данных о встрече в базу данных."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     description = message.text.strip()
 
     try:
@@ -109,6 +130,10 @@ def set_free_meeting(bot, message):
 
 def add_free_users(bot, message):
     """Поиск ближайшего свободного слота для встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     usernames = [username.strip() for username in message.text.split(',')]
     if not all_usernames_exist(usernames):
         bot.send_message(message.chat.id, 'Некоторые из указанных юзернеймов не найдены в базе данных. Пожалуйста, повторите ввод.')
@@ -162,6 +187,10 @@ def schedule_meeting(bot, message, next_free_slot, usernames, duration):
 
 def get_meeting_title(bot, message, next_free_slot, usernames, duration):
     """Получение названия встречи."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     title = message.text
     bot.send_message(message.chat.id, 'Введите описание встречи:')
     bot.register_next_step_handler(message, lambda m: create_meeting(bot, m, title, next_free_slot, usernames, duration))
@@ -169,6 +198,10 @@ def get_meeting_title(bot, message, next_free_slot, usernames, duration):
 
 def create_meeting(bot, message, title, next_free_slot, usernames, duration):
     """Создание новой встречи в базе данных."""
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
     description = message.text
     end_time = next_free_slot + datetime.timedelta(minutes=duration)  # Длительность встречи 1 час
 

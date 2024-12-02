@@ -115,6 +115,8 @@ def add_meeting(bot, title: str, start_time: str, end_time: str, description: st
 
 def delete_meeting_handler(bot, message):
     """Удаление встречи из базы данных."""
+    if message.text.strip() == '/cancel':
+        return
     try:
         meeting_id = int(message.text)
 
