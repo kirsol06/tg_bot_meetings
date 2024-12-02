@@ -1,8 +1,29 @@
-# pytest cache directory #
+# Meeting Scheduler Bot
 
-This directory contains data from the pytest's cache plugin,
-which provides the `--lf` and `--ff` options, as well as the `cache` fixture.
+## Описание
 
-**Do not** commit this to version control.
+Meeting Scheduler Bot — это Telegram-бот, который помогает пользователям планировать встречи, проверяя доступность участников и организуя их время. Бот позволяет пользователям регистрироваться, просматривать участников, назначать встречи и получать напоминания о предстоящих встречах.
 
-See [the docs](https://docs.pytest.org/en/stable/how-to/cache.html) for more information.
+## Команды
+/start - Начинает взаимодействие с ботом.
+/register - Регистрирует пользователя в базе данных.
+/set_schedule_meeting - Запланировать встречу на определенное время.
+/set_free_meeting - Найти ближайшее свободное время для встречи с участниками.
+/view_meetings - Посмотреть все запланированные встречи на текущей неделе.
+/delete_meeting - Удалить встречу по ID.
+/stats - Показать статистику встреч и визуализацию загруженности.
+/view_users - Отобразить всех пользователей в базе данных. 
+
+## Структура проекта
+
+bot_project/
+├── bot.py             # Основной файл для запуска бота
+├── commands
+├── requirements.txt   # Список зависимостей
+├── .env               # Файл для хранения конфиденциальных данных (токен бота)
+    ├── meetings.py        # Логика управления встречами и пользователями
+    ├── help.py            # Команда помощи
+    ├── register.py        # Команда регистрации пользователей
+    ├── reminders.py       # Логика уведомлений о встречах
+    ├── stats.py           # Работа со статистикой встреч
+    └── utils.py           # Утилиты для работы с базой данных и общими операциями
