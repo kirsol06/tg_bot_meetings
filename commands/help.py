@@ -28,3 +28,9 @@ def create_keyboard():
     button9 = KeyboardButton('/cancel')
     keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9)  # Добавляем кнопки на клавиатуру
     return keyboard
+
+def create_cancel_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)  # Создаем клавиатуру
+    button1 = KeyboardButton('/cancel')
+    keyboard.add(button1)
+    return keyboard

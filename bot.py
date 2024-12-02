@@ -12,6 +12,9 @@ from commands.help import help_command_handler  # Импорт функции с
 from commands.stats import generate_monthly_stats_plot
 from commands.reminders import schedule_reminder_check 
 from commands.help import create_keyboard
+from google_auth import authenticate_google, create_event
+from commands.utils import get_meetings_for_user
+
 
 
 load_dotenv()
@@ -25,7 +28,6 @@ schedule_reminder_check(bot)
 def start_handler(message):
     keyboard = create_keyboard() 
     bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
-
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
@@ -78,7 +80,20 @@ def show_stats(message):
     generate_monthly_stats_plot(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
 
+@bot.message_handler(commands=['sync_events'])
+def sync_events_handler(message):
+    try:
+        creds = authenticate_google()  # Аутентификация
+        meetings = get_meetings_for_user()  # Получение встреч из базы данных
+
+        for meeting in meetings:
+            create_event(creds, meeting)  
+    except Exception as e:
+        bot.send_message(message.chat.id, f"Ошибка при синхронизации: {e}")
+
 
 if __name__ == '__main__':
     print("Бот запущен...")
+    creds = authenticate_google()  # Аутентификация
     bot.polling(none_stop=True)
+
