@@ -105,14 +105,14 @@ def view_meetings(bot, message):
 def set_free_meeting(bot, message):
     """Обработка команды для нахождения свободного времени для встречи."""
     bot.send_message(message.chat.id, 'Введите usernames участников, которых вы хотите пригласить (через запятую). Если вы тоже участник встречи, то свой юзернейм тоже надо ввести')
-    bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, msg))
+    bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
 
-def find_free_slot(bot, message):
+def add_free_users(bot, message):
     """Поиск ближайшего свободного слота для встречи."""
     usernames = [username.strip() for username in message.text.split(',')]
     if not all_usernames_exist(usernames):
         bot.send_message(message.chat.id, 'Некоторые из указанных юзернеймов не найдены в базе данных. Пожалуйста, повторите ввод.')
-        bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, msg))
+        bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
         return
     all_meetings = []
     conn = get_db_connection()
@@ -125,35 +125,52 @@ def find_free_slot(bot, message):
             user_id = user[0]
             meetings = get_meetings_for_user(user_id)
             all_meetings.extend(meetings)
+    
+    conn.close() 
+    
+    bot.send_message(message.chat.id, 'Введите желаемую дату (YYYY-MM-DD), самое раннее время начала (HH-MM) и длительность встречи в минутах через запятую (например: 2024-12-03, 12:00, 50)')
+    bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, all_meetings, usernames, msg))
 
-    next_free_slot = find_next_free_slot(all_meetings)
-    conn.close()  # Закрываем соединение после операции
+def find_free_slot(bot, all_meetings, usernames, message):
+    try:
+        data = message.text.split(',')
+        date = data[0].strip()
+        time = data[1].strip()
+        duration = int(data[2].strip())
+        datetime_str = f"{date} {time}"
 
-    if next_free_slot:
-        response = f'Ближайшее свободное время для встречи: {next_free_slot.strftime("%Y-%m-%d %H:%M")}. ' \
-                   'Хотите запланировать встречу на это время? (да/нет)'
-        bot.send_message(message.chat.id, response)
-        bot.register_next_step_handler(message, lambda msg: schedule_meeting(bot, msg, next_free_slot, usernames))
+        start_time = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
+        
+        next_free_slot = find_next_free_slot(all_meetings, duration, start_time)
 
-def schedule_meeting(bot, message, next_free_slot, usernames):
+        if next_free_slot:
+            response = f'Ближайшее свободное время для встречи: {next_free_slot.strftime("%Y-%m-%d %H:%M")}. ' \
+                    'Хотите запланировать встречу на это время? (да/нет)'
+            bot.send_message(message.chat.id, response)
+            bot.register_next_step_handler(message, lambda msg: schedule_meeting(bot, msg, next_free_slot, usernames, duration))
+    except ValueError:
+        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите дату и время в правильном формате (YYYY-MM-DD HH:MM).')
+        bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, all_meetings, usernames, msg))
+
+def schedule_meeting(bot, message, next_free_slot, usernames, duration):
     """Обработка согласия на назначение встречи."""
     if message.text.lower() == 'да':
         bot.send_message(message.chat.id, 'Введите название встречи:')
-        bot.register_next_step_handler(message, lambda m: get_meeting_title(bot, m, next_free_slot, usernames))
+        bot.register_next_step_handler(message, lambda m: get_meeting_title(bot, m, next_free_slot, usernames, duration))
     else:
         bot.send_message(message.chat.id, 'Встреча не была запланирована.')
 
-def get_meeting_title(bot, message, next_free_slot, usernames):
+def get_meeting_title(bot, message, next_free_slot, usernames, duration):
     """Получение названия встречи."""
     title = message.text
     bot.send_message(message.chat.id, 'Введите описание встречи:')
-    bot.register_next_step_handler(message, lambda m: create_meeting(bot, m, title, next_free_slot, usernames))
+    bot.register_next_step_handler(message, lambda m: create_meeting(bot, m, title, next_free_slot, usernames, duration))
 
 
-def create_meeting(bot, message, title, next_free_slot, usernames):
+def create_meeting(bot, message, title, next_free_slot, usernames, duration):
     """Создание новой встречи в базе данных."""
     description = message.text
-    end_time = next_free_slot + datetime.timedelta(hours=1)  # Длительность встречи 1 час
+    end_time = next_free_slot + datetime.timedelta(minutes=duration)  # Длительность встречи 1 час
 
     # Добавление встречи и участников
     add_meeting(bot, title=title, start_time=next_free_slot.strftime("%Y-%m-%d %H:%M:%S"),
@@ -163,6 +180,6 @@ def create_meeting(bot, message, title, next_free_slot, usernames):
 
 def delete_meeting(bot, message):
     """Удаление встречи по ID."""
-    bot.send_message(message.chat.id, 'Введите ID встречи, которую хотите удалить:')
+    bot.send_message(message.chat.id, 'Введите ID встречи, которую хотите удалить (чтобы узнать id встреч, используйте команду /view_meetings):')
     bot.register_next_step_handler(message, lambda msg: delete_meeting_handler(bot, msg))
 

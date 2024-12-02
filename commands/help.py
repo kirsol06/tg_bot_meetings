@@ -8,7 +8,7 @@ def help_command_handler(message):
         "/set_free_meeting - Запланировать встречу на свободное время.\n"
         "/view_meetings - Посмотреть все запланированные встречи на текущей неделе.\n"
         "/view_users- Посмотреть всех зарегистрированных пользователей.\n"
-        "/delete_meeting - Удалить встречу.\n"
+        "/delete_meeting - Удалить встречу по id.\n"
         "/stats - Показать статистику встреч и визуализацию загруженности.\n"
     )
     bot.send_message(message.chat.id, help_text)

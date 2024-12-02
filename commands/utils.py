@@ -45,11 +45,9 @@ def users_are_free(usernames, start_time, end_time):
                         break
     return unavailable_users
 
-def find_next_free_slot(meetings, duration=60):
+def find_next_free_slot(meetings, duration, start_time):
     """Находит следующее свободное время для встречи с указанной продолжительностью."""
-    one_hour = datetime.timedelta(hours=1)
-    current_time = datetime.datetime.now().replace(second=0, microsecond=0)
-    next_free_time = current_time + one_hour  # Предполагаем, что первая проверка через час
+    next_free_time = start_time  # Предполагаем, что первая проверка через час
 
     while True:
         is_free = True
@@ -86,8 +84,8 @@ def send_meeting_notification(bot, user_id, title, start_time, end_time, descrip
     message = (
         f"🔥 Вам назначена новая встреча!\n"
         f"Название: {title}\n"
-        f"Дата и время начала: {start_time}\n"
-        f"Дата и время окончания: {end_time}\n"
+        f"Дата и время начала: {start_time[:-3]}\n"
+        f"Дата и время окончания: {end_time[:-3]}\n"
         f"Описание: {description}\n"
     )
     bot.send_message(user_id, message)
@@ -136,11 +134,11 @@ def delete_meeting_handler(bot, message):
         conn.commit()
 
         bot.send_message(message.chat.id, 'Встреча успешно удалена!')
+        conn.close()
 
     except ValueError:
         bot.send_message(message.chat.id, 'Введите корректный ID встречи.')
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка при удалении встречи. Убедитесь, что такая встреча существует.')
         print(f"Ошибка при удалении встречи: {e}")  # Для отладки
-    finally:
-        conn.close()  # Закрываем соединение после операции
+        
