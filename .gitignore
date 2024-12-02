@@ -1,7 +1,10 @@
 # Python
 __pycache__/
 *.py[cod]
+<<<<<<< HEAD
 *.pyc
+=======
+>>>>>>> 6f83a759b774fcb9bc9d9c9429c9540b96565094
 
 # Кэш pytest
 .pytest_cache/
