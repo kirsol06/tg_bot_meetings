@@ -32,14 +32,6 @@ def authenticate_google():
 
     return creds
 
-def get_meetings_from_db():
-    """Функция для получения встреч из базы данных SQLite."""
-    conn = sqlite3.connect('bot_database.db')  # Убедитесь, что указали правильное имя вашей базы данных
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, title, description, start_time, end_time FROM meetings")
-    meetings = cursor.fetchall()  # Извлекаем все встречи
-    conn.close()
-    return meetings
 
 def create_event(creds, meeting):
     """Создание события в Google Calendar."""
@@ -70,10 +62,3 @@ def create_event(creds, meeting):
         print(f"Событие '{meeting[1]}' успешно добавлено в Google Calendar.")
     else:
         print(f'Ошибка при добавлении события: {response.json()}')
-
-if __name__ == '__main__':
-    creds = authenticate_google()  # Аутентификация
-    meetings = get_meetings_from_db()  # Получение встреч из базы данных
-
-    for meeting in meetings:
-        create_event(creds, meeting)  # Создание события для каждой встречи
