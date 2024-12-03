@@ -1,3 +1,5 @@
+from telebot.types import ReplyKeyboardMarkup, KeyboardButton
+
 def help_command_handler(message):
     from bot import bot
     help_text = (
@@ -16,7 +18,6 @@ def help_command_handler(message):
     )
     bot.send_message(message.chat.id, help_text)
 
-from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 def create_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)  # Создаем клавиатуру
     button1 = KeyboardButton('/register')

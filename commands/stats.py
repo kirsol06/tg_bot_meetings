@@ -2,9 +2,10 @@ import sqlite3
 import io
 import datetime
 import matplotlib
+import matplotlib.pyplot as plt
 
 matplotlib.use('Agg')  # Используем бекенд без GUI
-import matplotlib.pyplot as plt
+
 
 def get_db_connection():
     """Открывает и возвращает новое соединение с базой данных."""
