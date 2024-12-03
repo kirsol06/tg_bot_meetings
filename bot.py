@@ -1,3 +1,4 @@
+from datetime import time
 import os
 import telebot
 from dotenv import load_dotenv
@@ -113,5 +114,11 @@ def sync_events_handler(message):
 
 if __name__ == '__main__':
     print("Бот запущен...")
-    bot.polling(none_stop=True)
+    while True:
+        try:
+            bot.polling(none_stop=True, timeout=60)
+        except Exception as e:
+            print(f"Ошибка: {e}, повторная попытка подключения через 5 секунд...")
+            time.sleep(5)
+
 
