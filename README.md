@@ -22,23 +22,109 @@
 
 ## Установка
 
-1. Клонируйте репозиторий:
+### 1. Клонируйте репозиторий:
    ```bash
    git clone https://github.com/yourusername/yourbotrepository.git
    cd yourbotrepository
    ```
 
-2. Установите необходимые библиотеки:
+### 2. Установите необходимые библиотеки:
    ```bash
    pip install -r requirements.txt
    ```
 
-3. Создайте файл `.env` в корневой директории проекта и добавьте свой Telegram токен:
+### 3. Создайте файл `.env` в корневой директории проекта и добавьте свой Telegram токен:
    ```
    TOKEN=ваш_токен
    ```
 
-4. Настройте Google API для аутентификации пользователей и добавьте необходимые ключи в ваш проект.
+### 4. Настройка Базы данных
+
+В проекте мы используме базу данных bot_database.db
+
+Создайте нужные таблицы с помощью этих sql кодов:
+```
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY,
+    username TEXT NOT NULL,
+    user_id INTEGER NOT NULL UNIQUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+```
+CREATE TABLE IF NOT EXISTS meetings (
+    id INTEGER PRIMARY KEY,
+    start_time DATETIME NOT NULL,
+    end_time DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+```
+
+```
+CREATE TABLE IF NOT EXISTS participants (
+    id INTEGER PRIMARY KEY,
+    meeting_id INTEGER NOT NULL,
+    user_id INTEGER NOT NULL,
+    status TEXT DEFAULT 'pending',
+    FOREIGN KEY (meeting_id) REFERENCES meetings (id) ON DELETE CASCADE
+);
+```
+Запустите коды в DB Browser для SQLite
+
+### 5. Конфигурационные файлы
+
+Создайте файл token_bot.txt, и добавьте в него токен вашего бота Telegram, который вы получили от Bot_Father в тг
+
+
+### 6. Google API: 
+Получите файл credentials.json для доступа к Google API и поместите его в корневую папку проекта.
+
+сейчас пойдет мясо
+
+#### Шаг 1: Создание проекта в Google Cloud Console
+Перейдите на Google Cloud Console:
+
+Откройте Google Cloud Console.
+Войдите в свой Google аккаунт:
+
+Если вас попросят, войдите в аккаунт Google.
+Создайте новый проект:
+
+Нажмите на выпадающее меню в верхней части страницы (где написано "Select a project") и выберите "New Project".
+
+Задайте имя проекту, нажмите "Create".
+
+#### Шаг 2: Включение необходимых API
+
+Включите API:
+В меню слева выберите "APIs & Services" → "Library".
+Найдите и выберите API "Google Calendar API".
+
+Нажмите кнопку "Enable", чтобы включить API для вашего проекта.
+
+#### Шаг 3: Создание учетных данных
+
+Создайте учетные данные:
+
+В меню слева выберите "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID".
+
+Настройка OAuth Consent Screen:
+
+Перед созданием учетных данных вам может быть предложено настроить экран согласия OAuth.
+
+Выберите "External", укажите необходимые данные (название приложения, адрес электронной почты поддержки и т.д.).
+
+Добавьте свою почту в test_users
+
+Выберите тип приложения:
+
+Для настольного приложения выберите "Desktop app".
+
+Укажите название клиента ("My Desktop Client" по дефолту) и нажмите "Create".
+
+Сохраните файл credentials.json в корневом каталоге вашего проекта.
+
 
 ## Использование
 
