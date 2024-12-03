@@ -143,3 +143,14 @@ def sync_events(user_id):
         event_exists = any(meeting[1] in event['summary'] for meeting in meetings)
         if not event_exists:
             delete_event(creds, event['id'])
+
+def token_exists(bot, message, user_id):
+    token_file = f'token_{user_id}.pickle'
+
+    # Проверяем, существует ли токен
+    if not os.path.exists(token_file):
+        bot.send_message(message.chat.id, 
+                         "Пожалуйста, пройдите аутентификацию, прежде чем использовать эту команду. \n"
+                         "Введите /authenticate для начала процесса.")
+        return False
+    return True

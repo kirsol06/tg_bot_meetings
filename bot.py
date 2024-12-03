@@ -1,14 +1,14 @@
 import os
 import telebot
 from dotenv import load_dotenv
-from commands.register import register_user, view_users  # Импорт функции регистрации
+from commands.register import register_user, view_users
 from commands.meetings import (
     set_schedule_meeting,
     view_meetings,
     delete_meeting,
     set_free_meeting
 )  
-from commands.help import help_command_handler  # Импорт функции справки
+from commands.help import help_command_handler
 from commands.stats import generate_monthly_stats_plot
 from commands.reminders import schedule_reminder_check 
 from commands.help import create_keyboard
@@ -88,17 +88,16 @@ def authenticate_user(message):
         # Если creds отсутствует, выводим URL для аутентификации
         bot.send_message(message.chat.id, 
                          f"Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
-                         "После авторизации введите код, который вам будет предоставлен.")
+                         "После авторизации введите 'code: ' и код, который вам будет предоставлен. Надо перетерпеть это один разок")
     else:
         bot.send_message(message.chat.id, 
                          "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
 
-@bot.message_handler(func=lambda message: message.text.startswith('code:'))
+@bot.message_handler(func=lambda message: message.text.startswith('code:'.lower()))
 def handle_code(message):
     user_id = message.from_user.id
     code = message.text.split(':')[1].strip()  # Извлекаем код из сообщения
     creds = authenticate_user_with_code(user_id, code)  # Получаем и сохраняем токен доступа
-
     if creds:
         bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
     else:
@@ -107,8 +106,9 @@ def handle_code(message):
 @bot.message_handler(commands=['sync_events'])
 def sync_events_handler(message):
     user_id = message.from_user.id  # Получаем идентификатор пользователя
-    sync_events(user_id)  # Выполняем синхронизацию
-    bot.send_message(message.chat.id, "Синхронизация с Google Calendar завершена.")
+    if token_exists(bot, message, user_id): # Прерываем выполнение функции, если токен отсутствует
+        sync_events(user_id)  # Выполняем синхронизацию
+        bot.send_message(message.chat.id, "Синхронизация с Google Calendar завершена.")
 
 
 if __name__ == '__main__':
