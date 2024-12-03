@@ -1,4 +1,4 @@
-from datetime import time
+import time
 import os
 import telebot
 from dotenv import load_dotenv
@@ -120,5 +120,3 @@ if __name__ == '__main__':
         except Exception as e:
             print(f"Ошибка: {e}, повторная попытка подключения через 5 секунд...")
             time.sleep(5)
-
-
