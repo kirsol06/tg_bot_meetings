@@ -26,7 +26,8 @@ def create_keyboard():
     button7 = KeyboardButton('/delete_meeting') 
     button8 = KeyboardButton('/stats')
     button9 = KeyboardButton('/cancel')
-    keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9)  # Добавляем кнопки на клавиатуру
+    button10 = KeyboardButton('/sync_events')
+    keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9, button10)  # Добавляем кнопки на клавиатуру
     return keyboard
 
 def create_cancel_keyboard():

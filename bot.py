@@ -12,8 +12,7 @@ from commands.help import help_command_handler  # Импорт функции с
 from commands.stats import generate_monthly_stats_plot
 from commands.reminders import schedule_reminder_check 
 from commands.help import create_keyboard
-from google_auth import authenticate_google, create_event
-from commands.utils import get_meetings_for_user
+from google_auth import authenticate_google, sync_events
 
 
 
@@ -82,15 +81,12 @@ def show_stats(message):
 
 @bot.message_handler(commands=['sync_events'])
 def sync_events_handler(message):
+    user_id = message.from_user.id  # Получаем идентификатор пользователя
     try:
-        creds = authenticate_google()  # Аутентификация
-        meetings = get_meetings_for_user()  # Получение встреч из базы данных
-
-        for meeting in meetings:
-            create_event(creds, meeting)  
+        sync_events(user_id)  # Вызываем функцию синхронизации
+        bot.send_message(message.chat.id, "Синхронизация завершена!")
     except Exception as e:
-        bot.send_message(message.chat.id, f"Ошибка при синхронизации: {e}")
-
+        bot.send_message(message.chat.id, f"Произошла ошибка при синхронизации: {str(e)}")
 
 if __name__ == '__main__':
     print("Бот запущен...")
