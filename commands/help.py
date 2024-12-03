@@ -37,3 +37,10 @@ def create_cancel_keyboard():
     button1 = KeyboardButton('/cancel')
     keyboard.add(button1)
     return keyboard
+
+def create_yes_no_keyboard():
+    keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)  # Создаем клавиатуру
+    button1 = KeyboardButton('да')
+    button2 = KeyboardButton('нет')
+    keyboard.add(button1, button2)
+    return keyboard

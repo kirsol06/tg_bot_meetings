@@ -113,34 +113,3 @@ def add_meeting(bot, title: str, start_time: str, end_time: str, description: st
     conn.close()  # Закрываем соединение после операции
 
 
-def delete_meeting_handler(bot, message):
-    """Удаление встречи из базы данных."""
-    if message.text.strip() == '/cancel':
-        return
-    try:
-        meeting_id = int(message.text)
-
-        conn = get_db_connection()
-        cursor = conn.cursor()
-
-        # Проверка на существование встречи
-        cursor.execute('SELECT * FROM meetings WHERE id = ?', (meeting_id,))
-        meeting = cursor.fetchone()
-
-        if not meeting:
-            bot.send_message(message.chat.id, 'Встреча с таким ID не найдена.')
-            return
-
-        cursor.execute('DELETE FROM meetings WHERE id = ?', (meeting_id,))
-        cursor.execute('DELETE FROM participants WHERE meeting_id = ?', (meeting_id,))  # Удаляем участников
-        conn.commit()
-
-        bot.send_message(message.chat.id, 'Встреча успешно удалена!')
-        conn.close()
-
-    except ValueError:
-        bot.send_message(message.chat.id, 'Введите корректный ID встречи.')
-    except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка при удалении встречи. Убедитесь, что такая встреча существует.')
-        print(f"Ошибка при удалении встречи: {e}")  # Для отладки
-        
