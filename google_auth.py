@@ -16,7 +16,7 @@ CLIENT_SECRETS_FILE = "credentials.json"
 
 def authenticate_google(user_id):
     creds = None
-    token_file = f'token_{user_id}.pickle'  # Уникальный файл токена для каждого пользователя
+    token_file = f'token_{user_id}.pickle'
 
     # Проверка наличия сохраненного токена
     if os.path.exists(token_file):
@@ -32,9 +32,9 @@ def authenticate_google(user_id):
             flow = Flow.from_client_secrets_file('credentials.json', SCOPES)
             flow.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
             authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
-            # Отправьте URL пользователю
+
             print(f"Перейдите по следующей ссылке для аутентификации: {authorization_url}")
-            return None  # Возвращаем None, так как пользователь еще не аутентифицирован
+            return None  
 
     return creds  # Если токен действителен, возвращаем creds
 

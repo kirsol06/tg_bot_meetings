@@ -45,7 +45,7 @@ def users_are_free(usernames, start_time, end_time):
                         break
     return unavailable_users
 
-def find_next_free_slot(meetings, duration, start_time):
+def find_nearest_free_time(meetings, duration, start_time):
     """Находит следующее свободное время для встречи с указанной продолжительностью."""
     next_free_time = start_time  # Предполагаем, что первая проверка через час
 
