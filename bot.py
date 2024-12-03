@@ -12,7 +12,7 @@ from commands.help import help_command_handler  # Импорт функции с
 from commands.stats import generate_monthly_stats_plot
 from commands.reminders import schedule_reminder_check 
 from commands.help import create_keyboard
-from google_auth import authenticate_google, sync_events
+from google_auth import *
 
 
 
@@ -79,17 +79,39 @@ def show_stats(message):
     generate_monthly_stats_plot(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
 
+@bot.message_handler(commands=['authenticate'])
+def authenticate_user(message):
+    user_id = message.from_user.id
+    creds = authenticate_google(user_id)  # Пытаемся аутентифицировать пользователя
+
+    if creds is None:
+        # Если creds отсутствует, выводим URL для аутентификации
+        bot.send_message(message.chat.id, 
+                         f"Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
+                         "После авторизации введите код, который вам будет предоставлен.")
+    else:
+        bot.send_message(message.chat.id, 
+                         "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
+
+@bot.message_handler(func=lambda message: message.text.startswith('code:'))
+def handle_code(message):
+    user_id = message.from_user.id
+    code = message.text.split(':')[1].strip()  # Извлекаем код из сообщения
+    creds = authenticate_user_with_code(user_id, code)  # Получаем и сохраняем токен доступа
+
+    if creds:
+        bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
+    else:
+        bot.send_message(message.chat.id, "Произошла ошибка при аутентификации.")
+
 @bot.message_handler(commands=['sync_events'])
 def sync_events_handler(message):
     user_id = message.from_user.id  # Получаем идентификатор пользователя
-    try:
-        sync_events(user_id)  # Вызываем функцию синхронизации
-        bot.send_message(message.chat.id, "Синхронизация завершена!")
-    except Exception as e:
-        bot.send_message(message.chat.id, f"Произошла ошибка при синхронизации: {str(e)}")
+    sync_events(user_id)  # Выполняем синхронизацию
+    bot.send_message(message.chat.id, "Синхронизация с Google Calendar завершена.")
+
 
 if __name__ == '__main__':
     print("Бот запущен...")
-    creds = authenticate_google()  # Аутентификация
     bot.polling(none_stop=True)
 

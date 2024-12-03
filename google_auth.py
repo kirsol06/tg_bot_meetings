@@ -7,31 +7,57 @@ from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from commands.utils import get_meetings_for_user
+from google_auth_oauthlib.flow import Flow
+
 
 # Определение необходимых областей доступа
 SCOPES = ['https://www.googleapis.com/auth/calendar']
+CLIENT_SECRETS_FILE = "credentials.json"
 
-def authenticate_google():
+def authenticate_google(user_id):
     creds = None
+    token_file = f'token_{user_id}.pickle'  # Уникальный файл токена для каждого пользователя
+
     # Проверка наличия сохраненного токена
-    if os.path.exists('token.pickle'):
-        with open('token.pickle', 'rb') as token:
+    if os.path.exists(token_file):
+        with open(token_file, 'rb') as token:
             creds = pickle.load(token)
 
     # Проверка на действительность токена
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            creds.refresh(Request())  # Обновляем токен, если он истек
         else:
-            # Если токена нет или он недействителен, инициализируем процесс аутентификации
-            flow = InstalledAppFlow.from_client_secrets_file('credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)  # Откроется локальный сервер для аутентификации
+            # Генерируем URL для аутентификации
+            flow = Flow.from_client_secrets_file('credentials.json', SCOPES)
+            flow.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'
+            authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+            # Отправьте URL пользователю
+            print(f"Перейдите по следующей ссылке для аутентификации: {authorization_url}")
+            return None  # Возвращаем None, так как пользователь еще не аутентифицирован
 
-            # Сохраняем токен для следующего использования
-            with open('token.pickle', 'wb') as token:
-                pickle.dump(creds, token)
+    return creds  # Если токен действителен, возвращаем creds
 
-    return creds
+
+def generate_auth_url(user_id):
+    flow = Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    flow.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'  # Используем редирект для получения кода
+    authorization_url, state = flow.authorization_url(access_type='offline', include_granted_scopes='true')
+
+    return authorization_url
+
+def authenticate_user_with_code(user_id, code):
+    flow = Flow.from_client_secrets_file(CLIENT_SECRETS_FILE, SCOPES)
+    flow.redirect_uri = 'urn:ietf:wg:oauth:2.0:oob'  # Нужен редирект URN
+    flow.fetch_token(code=code)  # Получаем токен доступа с помощью кода
+    creds = flow.credentials
+
+    # Сохраняем токен
+    token_file = f'token_{user_id}.pickle'
+    with open(token_file, 'wb') as token:
+        pickle.dump(creds, token)
+
+    return creds  # Возвращаем учетные данные
 
 
 
@@ -97,8 +123,10 @@ def delete_event(creds, event_id):
 
 def sync_events(user_id):
     """Синхронизация встреч между SQLite и Google Calendar."""
-    creds = authenticate_google()  # Аутентификация
+    creds = authenticate_google(user_id)  # Аутентификация
     meetings = get_meetings_for_user(user_id)  # Получаем встречи из базы данных
+    
+    # Состояние для хранения событий из Google Calendar
     calendar_events = get_events(creds)  # Получаем события из Google Calendar
 
     # Создаем список ID событий из Google Calendar
