@@ -13,7 +13,7 @@ def help_command_handler(message):
         "/delete_meeting - Удалить встречу по id.\n"
         "/stats - Показать статистику встреч и визуализацию загруженности.\n"
         "/cancel - Если посередине ввода данных внутри команды, вы передумали ей пользоваться и хотите выйти в меню команд\n"
-        "/authenticate - Аутентификация в гугл. Эту команду нужно выполнить перед тем, как начать пользоваться /sync_events и синхронизировать свои встречи с гугл календарем. Пока что сработает, только если вас добавили в тестировщиков\n"
+        "/google_authentication - Аутентификация в гугл. Эту команду нужно выполнить перед тем, как начать пользоваться /sync_events и синхронизировать свои встречи с гугл календарем. Пока что сработает, только если вас добавили в тестировщиков\n"
         "/sync_events - Синхронизировать свои встречи с гугл календарем\n"
     )
     bot.send_message(message.chat.id, help_text)
@@ -30,7 +30,8 @@ def create_keyboard():
     button8 = KeyboardButton('/stats')
     button9 = KeyboardButton('/cancel')
     button10 = KeyboardButton('/sync_events')
-    keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9, button10)  # Добавляем кнопки на клавиатуру
+    button11 = KeyboardButton('/google_authentication')
+    keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11)  # Добавляем кнопки на клавиатуру
     return keyboard
 
 def create_cancel_keyboard():

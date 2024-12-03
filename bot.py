@@ -80,7 +80,7 @@ def show_stats(message):
     generate_monthly_stats_plot(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
 
-@bot.message_handler(commands=['authenticate'])
+@bot.message_handler(commands=['google_authentication'])
 def authenticate_user(message):
     user_id = message.from_user.id
     creds = authenticate_google(user_id)  # Пытаемся аутентифицировать пользователя
@@ -88,7 +88,7 @@ def authenticate_user(message):
     if creds is None:
         # Если creds отсутствует, выводим URL для аутентификации
         bot.send_message(message.chat.id, 
-                         f"Перед тем как пройти аутентификацию, вам нужно стать тестировщиком. Напишите мне в тг @yasmin_zt вашу гугл почту, и мы вас добавим \n"
+                         f"Чтобы все было хорошо, вы должны быть внесены в список тестировщиков (test users в google cloud: oath consent screen)"
                          "Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
                          "После авторизации введите 'code: ' и код, который вам будет предоставлен. Надо перетерпеть это один разок")
     else:
@@ -101,7 +101,7 @@ def handle_code(message):
     code = message.text.split(':')[1].strip()  # Извлекаем код из сообщения
     creds = authenticate_user_with_code(user_id, code)  # Получаем и сохраняем токен доступа
     if creds:
-        bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
+        bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Вы можете использовать команду /sync_events.")
     else:
         bot.send_message(message.chat.id, "Произошла ошибка при аутентификации.")
 

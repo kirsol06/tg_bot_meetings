@@ -33,7 +33,7 @@
    pip install -r requirements.txt
    ```
 
-### 3. Создайте файл `.env` в корневой директории проекта и добавьте свой Telegram токен:
+### 3. Создайте файл `.env` в корневой директории проекта и добавьте свой Telegram токен, который вы получили от BotFather:
    ```
    TOKEN=ваш_токен
    ```
@@ -72,12 +72,8 @@ CREATE TABLE IF NOT EXISTS participants (
 ```
 Запустите коды в DB Browser для SQLite
 
-### 5. Конфигурационные файлы
 
-Создайте файл token_bot.txt, и добавьте в него токен вашего бота Telegram, который вы получили от Bot_Father в тг
-
-
-### 6. Google API: 
+### 5. Google API: 
 Получите файл credentials.json для доступа к Google API и поместите его в корневую папку проекта.
 
 сейчас пойдет мясо
@@ -85,10 +81,8 @@ CREATE TABLE IF NOT EXISTS participants (
 #### Шаг 1: Создание проекта в Google Cloud Console
 Перейдите на Google Cloud Console:
 
-Откройте Google Cloud Console.
-Войдите в свой Google аккаунт:
+Откройте Google Cloud Console. Войдите в свой Google аккаунт
 
-Если вас попросят, войдите в аккаунт Google.
 Создайте новый проект:
 
 Нажмите на выпадающее меню в верхней части страницы (где написано "Select a project") и выберите "New Project".
