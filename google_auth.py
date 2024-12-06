@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
-from commands.utils import get_meetings_for_user
 from google_auth_oauthlib.flow import Flow
+from commands.utils import get_meetings_for_user
 
 
 # Определение необходимых областей доступа
