@@ -3,9 +3,9 @@ from .help import create_keyboard, create_cancel_keyboard, create_yes_no_keyboar
 import datetime
 
 def set_schedule_meeting(bot, message):
-    """Обработка команды для назначения встречи."""
+    """Обработка команды для назначения встречи на определенное время."""
     bot.send_message(message.chat.id, 'Введите дату и время начала встречи в формате "YYYY-MM-DD HH:MM" (например, 2024-12-01 20:30).', reply_markup=create_cancel_keyboard())
-    bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg))
+    bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg)) # следующий шаг - функция process_scheduled_start_time
 
 def process_scheduled_start_time(bot, message):
     """Обработка времени начала встречи."""
