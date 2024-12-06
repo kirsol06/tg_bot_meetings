@@ -102,7 +102,7 @@ CREATE TABLE IF NOT EXISTS participants (
 
 Создайте учетные данные:
 
-* В меню слева `"APIs & Services"` выберите `"Credentials"` → `"Create Credentials"` → `"OAuth client ID"`  → `"CONFIGURE CONSENT SCREEN"`.
+* В меню слева `"APIs & Services"` выберите `"Credentials"` → `"+ Create Credentials"` → `"OAuth client ID"`  → `"CONFIGURE CONSENT SCREEN"`.
 
 * Настройка OAuth Consent Screen:
 
@@ -118,14 +118,11 @@ CREATE TABLE IF NOT EXISTS participants (
 
 * Во вкладке Summary убедитесь, что вы ввели все данные правильно и нажмите `"BACK TO DASHBOARD"`
 
-Выберите тип приложения:
-
-* Для настольного приложения выберите `"Desktop app"`.
+* В меню слева `"APIs & Services"` выберите `"Credentials"` → `"+ Create Credentials"` → `"OAuth client ID"` → `"Application type"`. Выберите `"Desktop app"`.
  
-* Укажите название клиента (`"My Desktop Client"` по дефолту) и нажмите `"Create"`.
+* Укажите название клиента (`"Desktop Client 1"` по дефолту) и нажмите `"Create"`.
 
-* Сохраните файл `credentials.json` в корневом каталоге вашего проекта.
-
+* Скачайте json файл, переименнуйте в `credentials.json` и сохраните его в корневом каталоге вашего проекта.
 
 ## Использование
 
