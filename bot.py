@@ -91,7 +91,7 @@ def authenticate_user(message):
                          "Чтобы все было хорошо, вы должны быть внесены в список тестировщиков. \n"
                          f"Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n"
                          "После авторизации введите 'code: ' и через пробел код, который вам будет предоставлен. Надо перетерпеть это один разок", 
-                         reply_markup=handle_code(message))
+                         reply_markup=handle_code(message))  
     else:
         bot.send_message(message.chat.id, 
                          "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
