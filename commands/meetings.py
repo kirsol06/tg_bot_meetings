@@ -3,13 +3,13 @@ from .help import create_keyboard, create_cancel_keyboard, create_yes_no_keyboar
 import datetime
 
 def set_schedule_meeting(bot, message):
-    """Обработка команды для назначения встречи."""
+    """Обработка команды для назначения встречи на определенное время."""
     bot.send_message(message.chat.id, 'Введите дату и время начала встречи в формате "YYYY-MM-DD HH:MM" (например, 2024-12-01 20:30).', reply_markup=create_cancel_keyboard())
-    bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg))
+    bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg)) # следующий шаг - функция process_scheduled_start_time
 
 def process_scheduled_start_time(bot, message):
     """Обработка времени начала встречи."""
-    if message.text.strip() == '/cancel':
+    if message.text.strip() == '/cancel': # Оставляем на каждом шаге возможность отменить создание встречи
         keyboard = create_keyboard() 
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
@@ -67,7 +67,6 @@ def process_usernames(bot, message, start_time, end_time):
 
     # Проверка доступности участников
     unavailable_users = users_are_free(usernames, start_time, end_time)
-
     if unavailable_users:
         response_msg = f'Не удалось запланировать встречу, так как следующие пользователи заняты: {", ".join(unavailable_users)}'
         keyboard = create_keyboard()
@@ -114,9 +113,11 @@ def view_meetings(bot, message):
     """Отображение запланированных встреч для пользователя."""
     user_id = message.from_user.id
     user_meetings = get_meetings_for_user(user_id)
-
+    
+    # Если у пользователя нет встреч 
     if not user_meetings:
         bot.send_message(message.chat.id, 'У вас нет запланированных встреч.', reply_markup = create_keyboard())
+    # Если есть
     else:
         user_response = 'Ваши предстоящие  запланированные встречи:\n \n'
         for meeting_id, title, start_time, end_time, description in user_meetings:
@@ -136,6 +137,7 @@ def add_free_users(bot, message):
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
     
+    # Проверка на существование юзеров в базе
     usernames = [username.strip() for username in message.text.split(',')]
     if not all_usernames_exist(usernames):
         bot.send_message(message.chat.id, 'Некоторые из указанных юзернеймов не найдены в базе данных. Пожалуйста, повторите ввод.', reply_markup=create_cancel_keyboard())
@@ -144,7 +146,7 @@ def add_free_users(bot, message):
     all_meetings = []
     conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
-
+    
     for username in usernames:
         cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
@@ -158,7 +160,9 @@ def add_free_users(bot, message):
     bot.send_message(message.chat.id, 'Введите желаемую дату (YYYY-MM-DD), самое раннее время начала (HH-MM) и длительность встречи в минутах через пробел (например: 2024-12-03 12:00 50)', reply_markup=create_cancel_keyboard())
     bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, all_meetings, usernames, msg))
 
+
 def find_free_slot(bot, all_meetings, usernames, message):
+    """Функция для поиска свободного слота в соответствии с указанным временем и участниками"""
     if message.text.strip() == '/cancel':
         keyboard = create_keyboard() 
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)

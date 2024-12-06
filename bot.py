@@ -88,22 +88,25 @@ def authenticate_user(message):
     if creds is None:
         # Если creds отсутствует, выводим URL для аутентификации
         bot.send_message(message.chat.id, 
-                         "Чтобы все было хорошо, вы должны быть внесены в список тестировщиков.\n"
-                         f"Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
+                         f"Чтобы все было хорошо, вы должны быть внесены в список тестировщиков (test users в google cloud: oath consent screen)"
+                         "Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
                          "После авторизации введите 'code: ' и код, который вам будет предоставлен. Надо перетерпеть это один разок")
     else:
         bot.send_message(message.chat.id, 
                          "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
 
-@bot.message_handler(func=lambda message: message.text.startswith('code:'.lower()))
+@bot.message_handler(func=lambda message: message)
 def handle_code(message):
-    user_id = message.from_user.id
-    code = message.text.split(':')[1].strip()  # Извлекаем код из сообщения
-    creds = authenticate_user_with_code(user_id, code)  # Получаем и сохраняем токен доступа
-    if creds:
-        bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Вы можете использовать команду /sync_events.")
+    if message.text.startswith('code:'.lower()):
+        user_id = message.from_user.id
+        code = message.text.split(':')[1].strip()  # Извлекаем код из сообщения
+        creds = authenticate_user_with_code(user_id, code)  # Получаем и сохраняем токен доступа
+        if creds:
+            bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Вы можете использовать команду /sync_events.")
+        else:
+            bot.send_message(message.chat.id, "Произошла ошибка при аутентификации.")
     else:
-        bot.send_message(message.chat.id, "Произошла ошибка при аутентификации.")
+        bot.send_message(message.chat.id, "В начале сообщения введите 'code:' и через пробел вставьте код", reply_markup=handle_code(message))
 
 @bot.message_handler(commands=['sync_events'])
 def sync_events_handler(message):
