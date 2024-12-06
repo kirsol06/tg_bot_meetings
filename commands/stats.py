@@ -3,16 +3,13 @@ import io
 import datetime
 import matplotlib
 import matplotlib.pyplot as plt
+from .utils import get_db_connection
 
 matplotlib.use('Agg')  # Используем бекенд без GUI
 
-def get_db_connection():
-    """Открывает и возвращает новое соединение с базой данных."""
-    return sqlite3.connect('bot_database.db')
-
 def calculate_average_meeting_duration(first_day, last_day):
     """Вычисляет среднюю длительность встреч за заданный период."""
-    conn = get_db_connection()
+    conn = get_db_connection('bot_database')
     cursor = conn.cursor()
 
     # Запрос на получение начала и конца встреч за указанный период
@@ -39,7 +36,7 @@ def calculate_average_meeting_duration(first_day, last_day):
 
 def generate_monthly_stats_plot(bot, message):
     """Генерирует график с количеством встреч за текущий месяц."""
-    conn = get_db_connection()
+    conn = get_db_connection('bot_database')
     cursor = conn.cursor()
 
     # Определяем первый и последний день текущего месяца

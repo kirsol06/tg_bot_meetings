@@ -1,7 +1,6 @@
-from .utils import  add_meeting, get_meetings_for_user, find_nearest_free_time, all_usernames_exist, users_are_free, get_db_connection
+from .utils import *
 from .help import create_keyboard, create_cancel_keyboard, create_yes_no_keyboard
 import datetime
-
 
 def set_schedule_meeting(bot, message):
     """Обработка команды для назначения встречи."""
@@ -100,7 +99,7 @@ def save_meeting(bot, message, title, start_time, end_time, usernames):
     description = message.text.strip()
 
     try:
-        add_meeting(bot, title=title,
+        add_meeting(bot, 'bot_database', title=title,
                     start_time=start_time.strftime("%Y-%m-%d %H:%M:%S"),
                     end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"),
                     description=description,
@@ -143,7 +142,7 @@ def add_free_users(bot, message):
         bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
         return
     all_meetings = []
-    conn = get_db_connection()
+    conn = get_db_connection('bot_database')
     cursor = conn.cursor()
 
     for username in usernames:
@@ -217,7 +216,7 @@ def create_meeting(bot, message, title, next_free_slot, usernames, duration):
     end_time = next_free_slot + datetime.timedelta(minutes=duration)  # Длительность встречи 1 час
 
     # Добавление встречи и участников
-    add_meeting(bot, title=title, start_time=next_free_slot.strftime("%Y-%m-%d %H:%M:%S"),
+    add_meeting(bot, 'bot_database', title=title, start_time=next_free_slot.strftime("%Y-%m-%d %H:%M:%S"),
                 end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"), description=description, usernames=usernames)
     bot.send_message(message.chat.id, 'Встреча успешно запланирована!')
 
@@ -238,7 +237,7 @@ def delete_meeting_handler(bot, message):
         return
     try:
         meeting_id = int(message.text)
-        conn = get_db_connection()
+        conn = get_db_connection('bot_database')
         cursor = conn.cursor()
 
         cursor.execute('SELECT * FROM meetings WHERE id = ?', (meeting_id,))

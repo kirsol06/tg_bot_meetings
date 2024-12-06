@@ -1,12 +1,12 @@
 import sqlite3
 import datetime
 
-def get_db_connection():
+def get_db_connection(x):
     """Открывает и возвращает новое соединение с базой данных."""
-    return sqlite3.connect('bot_database.db')
+    return sqlite3.connect(x)
 
 def get_meetings_for_user(user_id):
-    conn = get_db_connection()
+    conn = get_db_connection('bot_database')
     cursor = conn.cursor()
 
     # Получаем текущее время
@@ -28,7 +28,7 @@ def get_meetings_for_user(user_id):
 def users_are_free(usernames, start_time, end_time):
     """Проверяет, свободны ли пользователи в заданном временном интервале."""
     unavailable_users = []
-    with get_db_connection() as conn:
+    with get_db_connection('bot_database') as conn:
         cursor = conn.cursor()
         for username in usernames:
             cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
@@ -67,7 +67,7 @@ def find_nearest_free_time(meetings, duration, start_time):
     
 def all_usernames_exist(usernames):
     """Проверяет, существуют ли все юзернеймы в базе данных."""
-    conn = get_db_connection()
+    conn = get_db_connection('bot_database')
     cursor = conn.cursor()
 
     existing_usernames = set()
@@ -91,9 +91,9 @@ def send_meeting_notification(bot, user_id, title, start_time, end_time, descrip
     bot.send_message(user_id, message)
 
 
-def add_meeting(bot, title: str, start_time: str, end_time: str, description: str, usernames: list):
+def add_meeting(bot, db:str, title: str, start_time: str, end_time: str, description: str, usernames: list):
     """Добавление встречи в базу данных."""
-    conn = get_db_connection()
+    conn = get_db_connection(db)
     cursor = conn.cursor()
 
     cursor.execute('INSERT INTO meetings (title, start_time, end_time, description) VALUES (?, ?, ?, ?)',
