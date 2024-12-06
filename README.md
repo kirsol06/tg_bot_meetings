@@ -55,6 +55,7 @@ CREATE TABLE IF NOT EXISTS users (
 ```
 CREATE TABLE IF NOT EXISTS meetings (
     id INTEGER PRIMARY KEY,
+    title TEXT NOT NULL,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -143,7 +144,7 @@ python bot.py
 - `/view_meetings` - Позволяет просмотреть все запланированные встречи.
 - `/view_users` - Просматривает всех зарегистрированных пользователей.
 - `/stats` - Генерирует и отображает статистику встреч за неделю.
-- `/authenticate` - Процесс аутентификации пользователя через Google.
+- `/google_authentication` - Процесс аутентификации пользователя через Google.
 - `/sync_events` - Синхронизирует события с Google Календарем.
 - `/cancel` - Отменяет текущую операцию и возвращает в главное меню.
 
@@ -158,6 +159,8 @@ python bot.py
   - `stats.py` - Сбор и отображение статистики встреч.
   - `reminders.py` - Напоминания о встречах.
   - `help.py` - Функции, связанные с помощью и интерфейсом.
+  - `utils.py` - Вспомогательные функции
 
 - **`google_auth.py`** - Функции для аутентификации и работы с Google API.
-
+- **`test_public.py`** - Тесты для функций
+- **`test_database`** - Тестовая база данных
