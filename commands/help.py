@@ -36,12 +36,14 @@ def create_keyboard():
     keyboard.add(button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11)  # Добавляем кнопки на клавиатуру
     return keyboard
 
+# Клавиатура с командой /cancel
 def create_cancel_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)  # Создаем клавиатуру
     button1 = KeyboardButton('/cancel')
     keyboard.add(button1)
     return keyboard
 
+# Клавиатура с да/нет для команды /set_free_meeting, где мы подтверждаем (или не подтверждаем) сохранение встречи
 def create_yes_no_keyboard():
     keyboard = ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)  # Создаем клавиатуру
     button1 = KeyboardButton('да')

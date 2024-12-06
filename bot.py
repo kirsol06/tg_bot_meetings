@@ -88,8 +88,8 @@ def authenticate_user(message):
     if creds is None:
         # Если creds отсутствует, выводим URL для аутентификации
         bot.send_message(message.chat.id, 
-                         f"Чтобы все было хорошо, вы должны быть внесены в список тестировщиков (test users в google cloud: oath consent screen)"
-                         "Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
+                         "Чтобы все было хорошо, вы должны быть внесены в список тестировщиков.\n"
+                         f"Перейдите по следующей ссылке для аутентификации: {generate_auth_url(user_id)}.\n "
                          "После авторизации введите 'code: ' и код, который вам будет предоставлен. Надо перетерпеть это один разок")
     else:
         bot.send_message(message.chat.id, 
