@@ -9,7 +9,7 @@ matplotlib.use('Agg')  # Используем бекенд без GUI
 
 def calculate_average_meeting_duration(first_day, last_day):
     """Вычисляет среднюю длительность встреч за заданный период."""
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     # Запрос на получение начала и конца встреч за указанный период
@@ -36,7 +36,7 @@ def calculate_average_meeting_duration(first_day, last_day):
 
 def generate_monthly_stats_plot(bot, message):
     """Генерирует график с количеством встреч за текущий месяц."""
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     # Определяем первый и последний день текущего месяца

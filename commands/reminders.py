@@ -6,7 +6,7 @@ sent_reminders = {}
 
 def send_reminders(bot):
     """Отправка напоминаний участникам встреч за 30 минут до их начала."""
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     now = datetime.datetime.now()

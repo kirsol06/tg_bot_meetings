@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS participants (
     FOREIGN KEY (meeting_id) REFERENCES meetings (id) ON DELETE CASCADE
 );
 ```
-Запустите коды в DB Browser для SQLite
+Запустите коды в DB Browser для SQLite.
 
 
 ### 5. Google API: 
@@ -81,45 +81,48 @@ CREATE TABLE IF NOT EXISTS participants (
 сейчас пойдет мясо
 
 #### Шаг 1: Создание проекта в Google Cloud Console
-Перейдите на Google Cloud Console:
+* Перейдите на <a href="https://developer.google.com/console">Google Cloud Console</a>:
 
-Откройте Google Cloud Console. Войдите в свой Google аккаунт
+* Войдите в свой Google аккаунт.
 
-Создайте новый проект:
+* Создайте новый проект: нажмите на выпадающее меню в верхней части страницы (где написано "Select a project") и выберите `"New Project"`.
 
-Нажмите на выпадающее меню в верхней части страницы (где написано "Select a project") и выберите "New Project".
-
-Задайте имя проекту, нажмите "Create".
+* Задайте имя проекту, нажмите "Create".
 
 #### Шаг 2: Включение необходимых API
 
-Включите API:
-В меню слева выберите "APIs & Services" → "Library".
-Найдите и выберите API "Google Calendar API".
+* Включите API:
+В меню слева `"APIs & Services"` выберите `"Library"`.
 
-Нажмите кнопку "Enable", чтобы включить API для вашего проекта.
+* В поиске найдите и выберите API `"Google Calendar API"`.
+
+* Нажмите кнопку `"Enable"`, чтобы включить API для вашего проекта.
 
 #### Шаг 3: Создание учетных данных
 
 Создайте учетные данные:
 
-В меню слева выберите "APIs & Services" → "Credentials" → "Create Credentials" → "OAuth client ID".
+* В меню слева `"APIs & Services"` выберите `"Credentials"` → `"Create Credentials"` → `"OAuth client ID"`  → `"CONFIGURE CONSENT SCREEN"`.
 
-Настройка OAuth Consent Screen:
+* Настройка OAuth Consent Screen:
 
-Перед созданием учетных данных вам может быть предложено настроить экран согласия OAuth.
+* Перед созданием учетных данных вам будет предложено настроить экран согласия OAuth.
 
-Выберите "External", укажите необходимые данные (название приложения, адрес электронной почты поддержки и т.д.).
+* Выберите `"External"`
 
-Добавьте свою почту в test_users
+* Во вкладке OAuth consent screen укажите необходимые данные (`app name`, `user support email`, `developer contact information`). 
+
+* Во вкладке Scopes нажмите на `ADD OR REMOVE SCOPES` → в появившейся вкладке выберите `API "Google Calendar API"`, Scope `".../auth/calendar"` → `UPDATE`.
+
+* Во вкладке Test users нажмите `+ADD USERS` и добавьте свою почту и всех тех, кому вы хотите дать возможность пользоваться командами для синхронизации с гугл календарем. 
 
 Выберите тип приложения:
 
-Для настольного приложения выберите "Desktop app".
+* Для настольного приложения выберите "Desktop app".
+ 
+* Укажите название клиента ("My Desktop Client" по дефолту) и нажмите "Create".
 
-Укажите название клиента ("My Desktop Client" по дефолту) и нажмите "Create".
-
-Сохраните файл credentials.json в корневом каталоге вашего проекта.
+* Сохраните файл credentials.json в корневом каталоге вашего проекта.
 
 
 ## Использование

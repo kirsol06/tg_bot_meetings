@@ -6,7 +6,7 @@ def get_db_connection(x):
     return sqlite3.connect(x)
 
 def get_meetings_for_user(user_id):
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     # Получаем текущее время
@@ -28,7 +28,7 @@ def get_meetings_for_user(user_id):
 def users_are_free(usernames, start_time, end_time):
     """Проверяет, свободны ли пользователи в заданном временном интервале."""
     unavailable_users = []
-    with get_db_connection('bot_database') as conn:
+    with get_db_connection('bot_database.db') as conn:
         cursor = conn.cursor()
         for username in usernames:
             cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
@@ -67,7 +67,7 @@ def find_nearest_free_time(meetings, duration, start_time):
     
 def all_usernames_exist(usernames):
     """Проверяет, существуют ли все юзернеймы в базе данных."""
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     existing_usernames = set()

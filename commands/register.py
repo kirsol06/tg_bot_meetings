@@ -1,7 +1,7 @@
 from .utils import get_db_connection
 
 def register_user(bot, message):
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
     
     us_id = message.from_user.id
@@ -17,7 +17,7 @@ def register_user(bot, message):
 
 def view_users(bot, message):
     """Отображение всех пользователей в базе данных."""
-    conn = get_db_connection('bot_database')
+    conn = get_db_connection('bot_database.db')
     cursor = conn.cursor()
 
     # Запрос всех пользователей
