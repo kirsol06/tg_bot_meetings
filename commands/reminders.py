@@ -22,7 +22,6 @@ def send_reminders(bot):
 
     meetings = cursor.fetchall()
     conn.close()
-
     for meeting_id, title, start_time, end_time, description, user_id in meetings:
         if meeting_id not in sent_reminders: # Если еще не напоминали, то делаем
             message = (

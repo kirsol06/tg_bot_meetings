@@ -113,7 +113,6 @@ def delete_event(creds, event_id):
     headers = {
         'Authorization': f'Bearer {creds.token}',
     }
-
     response = requests.delete(url, headers=headers)
 
     if response.status_code == 204:

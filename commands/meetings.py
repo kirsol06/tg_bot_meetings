@@ -108,7 +108,7 @@ def save_scheduled_meeting(bot, message, title, start_time, end_time, usernames)
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка при сохранении встречи. Пожалуйста, попробуйте снова.', reply_markup=create_cancel_keyboard())
         print(f"Ошибка при сохранении встречи: {e}")  # Для отладки
-
+ 
 def view_meetings(bot, message):
     """Отображение запланированных встреч для пользователя."""
     user_id = message.from_user.id

@@ -20,7 +20,6 @@ def view_users(bot, message):
     """Отображение всех пользователей в базе данных."""
     conn = get_db_connection()
     cursor = conn.cursor()
-
     # Запрос всех пользователей
     cursor.execute('SELECT username FROM users')
     users = cursor.fetchall()

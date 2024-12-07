@@ -98,6 +98,7 @@ def authenticate_user(message):
         bot.send_message(message.chat.id, 
                          "Вы успешно аутентифицированы! Теперь вы можете использовать команду /sync_events.")
 
+
 @bot.message_handler(func=lambda message: message.text.startswith('code:'.lower()))
 def handle_code(message):
     user_id = message.from_user.id

@@ -76,7 +76,6 @@ def generate_monthly_stats_plot(bot, message):
     plt.close() 
 
     close_connection(conn)
-    
     bot.send_photo(message.chat.id, img.getvalue(), caption=f"Количество встреч за текущий месяц по дням.\nВаше общее количество встреч: {meeting_count}.\nВаше среднее время встречи: {average_meeting_duration} минут.\nВаше общее время встреч: {total_meeting_time} минут.")
 
 def close_connection(conn):

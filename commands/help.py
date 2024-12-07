@@ -3,7 +3,7 @@ from telebot.types import ReplyKeyboardMarkup, KeyboardButton
 # Текст комманды /help
 def help_command_handler(message):
     from bot import bot
-    help_text = (
+    help_text = ( 
         "Доступные команды:\n"
         "/start - Начать взаимодействие с ботом.\n"
         "/register - Зарегистрироваться в базе данных.\n"

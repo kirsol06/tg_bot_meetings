@@ -235,7 +235,6 @@ def test_view_meetings_no_meetings():
          patch('commands.meetings.create_keyboard', return_value=MagicMock()) as mock_create_keyboard:
 
         view_meetings(bot, message)
-
         # Проверяем, что отправлено сообщение о том, что нет встреч
         bot.send_message.assert_called_once_with(
             message.chat.id,
