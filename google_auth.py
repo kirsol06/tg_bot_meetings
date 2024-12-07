@@ -9,7 +9,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google_auth_oauthlib.flow import Flow
 from commands.utils import get_meetings_for_user
 
-
+# мы не говорим о том, что происходит в этом файле
 # Определение необходимых областей доступа
 SCOPES = ['https://www.googleapis.com/auth/calendar']
 CLIENT_SECRETS_FILE = "credentials.json"
@@ -85,11 +85,11 @@ def create_event(creds, meeting):
         'summary': meeting[1],  # Название
         'start': {
             'dateTime': start_time,  # Время начала
-            'timeZone': 'Europe/Moscow',  # Установите свой часовой пояс
+            'timeZone': 'Europe/Moscow',  # Наш часовой пояс
         },
         'end': {
-            'dateTime': end_time,  # Время окончания
-            'timeZone': 'Europe/Moscow',  # Установите свой часовой пояс
+            'dateTime': end_time,
+            'timeZone': 'Europe/Moscow',
         },
         'description': meeting[4],  # Описание
     }
