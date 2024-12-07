@@ -98,7 +98,7 @@ def save_scheduled_meeting(bot, message, title, start_time, end_time, usernames)
     description = message.text.strip()
 
     try:
-        add_meeting(bot, 'bot_database.db', title=title,
+        add_meeting(bot, title=title,
                     start_time=start_time.strftime("%Y-%m-%d %H:%M:%S"),
                     end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"),
                     description=description,
@@ -143,10 +143,11 @@ def add_free_users(bot, message):
         bot.send_message(message.chat.id, 'Некоторые из указанных юзернеймов не найдены в базе данных. Пожалуйста, повторите ввод.', reply_markup=create_cancel_keyboard())
         bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
         return
-    all_meetings = []
-    conn = get_db_connection('bot_database.db')
-    cursor = conn.cursor()
     
+    all_meetings = []
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    # Достаем все будущие встречи для желаемых участников
     for username in usernames:
         cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
         user = cursor.fetchone()
@@ -176,10 +177,10 @@ def find_free_slot(bot, all_meetings, usernames, message):
         time = data[1].strip()
         duration = int(data[2].strip())
         datetime_str = f"{date} {time}"
-
+        
         start_time = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
         
-        next_free_slot = find_nearest_free_time(all_meetings, duration, start_time)
+        next_free_slot = find_nearest_free_time(all_meetings, duration, start_time) 
 
         if next_free_slot:
             response = f'Ближайшее свободное время для встречи: {next_free_slot.strftime("%Y-%m-%d %H:%M")}. ' \
@@ -217,10 +218,10 @@ def create_free_meeting(bot, message, title, next_free_slot, usernames, duration
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
     description = message.text
-    end_time = next_free_slot + datetime.timedelta(minutes=duration)  # Длительность встречи 1 час
+    end_time = next_free_slot + datetime.timedelta(minutes=duration) 
 
     # Добавление встречи и участников
-    add_meeting(bot, 'bot_database.db', title=title,
+    add_meeting(bot, title=title,
                 start_time=next_free_slot.strftime("%Y-%m-%d %H:%M:%S"),
                 end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"), 
                 description=description, 
@@ -233,6 +234,7 @@ def delete_meeting(bot, message):
     bot.send_message(message.chat.id, 'Введите ID встречи, которую хотите удалить (чтобы узнать id встреч, используйте команду /view_meetings):', reply_markup=create_cancel_keyboard())
     bot.register_next_step_handler(message, lambda msg: delete_meeting_handler(bot, msg))
 
+
 def delete_meeting_handler(bot, message):
     """Удаление встречи из базы данных."""
     if message.text.strip() == '/cancel':
@@ -244,26 +246,29 @@ def delete_meeting_handler(bot, message):
         return
     try:
         meeting_id = int(message.text)
-        conn = get_db_connection('bot_database.db')
+        conn = get_db_connection()
         cursor = conn.cursor()
 
         cursor.execute('SELECT * FROM meetings WHERE id = ?', (meeting_id,))
         meeting = cursor.fetchone()
 
         if not meeting:
-            bot.send_message(message.chat.id, 'Встреча с таким ID не найдена.')
+            bot.send_message(message.chat.id, 'Встреча с таким ID не найдена, повторите ввод.', reply_markup = create_cancel_keyboard())
+            bot.register_next_step_handler(message, lambda msg: delete_meeting_handler(bot, msg))
             return
 
         cursor.execute('DELETE FROM meetings WHERE id = ?', (meeting_id,))
         cursor.execute('DELETE FROM participants WHERE meeting_id = ?', (meeting_id,))  # Удаляем участников
         conn.commit()
 
-        bot.send_message(message.chat.id, 'Встреча успешно удалена!')
+        bot.send_message(message.chat.id, 'Встреча успешно удалена!', reply_markup = create_keyboard())
         conn.close()
 
     except ValueError:
-        bot.send_message(message.chat.id, 'Введите корректный ID встречи.')
+        bot.send_message(message.chat.id, 'Введите корректный ID встречи.', reply_markup = create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: delete_meeting_handler(bot, msg))
+
     except Exception as e:
-        bot.send_message(message.chat.id, 'Ошибка при удалении встречи. Убедитесь, что такая встреча существует.')
+        bot.send_message(message.chat.id, 'Ошибка при удалении встречи. Убедитесь, что такая встреча существует.', reply_markup = delete_meeting_handler(bot, message))
         print(f"Ошибка при удалении встречи: {e}")  # Для отладки
         

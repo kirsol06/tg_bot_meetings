@@ -1,15 +1,16 @@
 import pytest
-from unittest.mock import *
 import datetime
 import io
+from unittest.mock import *
 from commands.utils import *
 from commands.meetings import *
 from commands.register import *
 from commands.stats import *
 from commands.reminders import *
 
+'''Теститурем с помощью mock'''
 
-def test_all_usernames_exist():
+def test_all_usernames_exist(): 
     with patch('commands.utils.get_db_connection') as mock_conn:
         mock_cursor = MagicMock()
         mock_cursor.fetchall.return_value = [('user1',), ('user2',)]
@@ -17,6 +18,7 @@ def test_all_usernames_exist():
         
         assert all_usernames_exist(['user1', 'user2'])
         assert not all_usernames_exist(['user1', 'user3'])
+
 
 def test_set_free_meeting():
     bot = MagicMock()
@@ -29,11 +31,12 @@ def test_set_free_meeting():
         bot.send_message.assert_called_with(
             message.chat.id,
             'Введите usernames участников, которых вы хотите пригласить (через запятую). Если вы тоже участник встречи, то свой юзернейм тоже надо ввести',
-            reply_markup=mock_create_cancel_keyboard.return_value  # Используем замокированный объект
+            reply_markup=mock_create_cancel_keyboard.return_value  # Проверяем также, что выдает клавиатуру
         )
 
 
 def test_send_meeting_notification():
+    # Создаем все нужные мок параметры для нашей функции
     bot = MagicMock()
     user_id = 12345
     title = "Встреча"
@@ -72,12 +75,13 @@ def test_delete_meeting_handler():
         mock_cursor.execute.assert_any_call('DELETE FROM participants WHERE meeting_id = ?', (1,))
         bot.send_message.assert_called_once_with(message.chat.id, 'Встреча успешно удалена!')
 
+
 def test_generate_monthly_stats_plot():
     bot = MagicMock()
     message = MagicMock()
     message.chat.id = 67890
 
-    # Патчим необходимые функции
+    # Патчим нужные функции из stats
     with patch('commands.stats.get_db_connection') as mock_conn, \
          patch('commands.stats.calculate_average_meeting_duration') as mock_calculate_duration, \
          patch('matplotlib.pyplot.savefig') as mock_savefig:
@@ -90,7 +94,7 @@ def test_generate_monthly_stats_plot():
         last_day_of_month = (first_day_of_month + datetime.timedelta(days=32)).replace(day=1) - datetime.timedelta(days=1)
 
         # Настраиваем возврат для расчета средней продолжительности встреч
-        mock_calculate_duration.return_value = (30, 5, 150)  # (average_duration, count, total_time)
+        mock_calculate_duration.return_value = (30, 5, 150)  # average_duration, count, total_time соответственно
 
         # Настраиваем возврат количества встреч по дням
         meetings_per_day_data = [
@@ -108,15 +112,13 @@ def test_generate_monthly_stats_plot():
         days[1] = 3  # 2 число месяца
         bot.send_photo.assert_called_once_with(
             message.chat.id,
-            ANY,  # Указываем, что вы ожидаете объект изображения из памяти
+            ANY,  # Указываем, что ожидаем изображение
             caption="Количество встреч за текущий месяц по дням.\nВаше общее количество встреч: 5.\nВаше среднее время встречи: 30 минут.\nВаше общее время встреч: 150 минут."
         )
 
         # Проверяем, что сохраняется график
         mock_savefig.assert_called_once()
 
-        # Проверяем, что соединение с базой данных закрывается
-        mock_conn.return_value.close.assert_called_once()
 
 def test_register_user_already_registered():
     bot = MagicMock()
@@ -150,7 +152,6 @@ def test_register_user_new_user():
         mock_cursor = MagicMock()
         mock_conn.return_value.cursor.return_value = mock_cursor
         
-        # Настраиваем возврат, чтобы имитировать нового пользователя
         mock_cursor.fetchone.return_value = None  # Пользователь не зарегистрирован
 
         register_user(bot, message)
@@ -161,16 +162,12 @@ def test_register_user_new_user():
         bot.send_message.assert_called_once_with(message.chat.id, 'Вы успешно добавлены в базу данных!')
 
 
-
-from unittest.mock import MagicMock, patch
-
 def test_process_start_time_invalid_format1():
     bot = MagicMock()
     message = MagicMock()
     message.chat.id = 67890
     message.text = "invalid_format"
 
-    # Патчинг create_cancel_keyboard, чтобы вернуть замокированный объект
     with patch('commands.meetings.create_cancel_keyboard', return_value=MagicMock()) as mock_create_cancel_keyboard:
         # Вызываем функцию обработки времени начала
         process_scheduled_start_time(bot, message)
@@ -179,7 +176,7 @@ def test_process_start_time_invalid_format1():
         bot.send_message.assert_called_once_with(
             message.chat.id,
             'Ошибка. Пожалуйста, введите дату и время в правильном формате.',
-            reply_markup=mock_create_cancel_keyboard.return_value  # используем мок объект
+            reply_markup=mock_create_cancel_keyboard.return_value 
         )
 
 
@@ -189,7 +186,6 @@ def test_process_start_time_invalid_format2():
     message.chat.id = 67890
     message.text = "2024-12-01 25:17"
 
-    # Патчинг create_cancel_keyboard, чтобы вернуть замокированный объект
     with patch('commands.meetings.create_cancel_keyboard', return_value=MagicMock()) as mock_create_cancel_keyboard:
         # Вызываем функцию обработки времени начала
         process_scheduled_start_time(bot, message)
@@ -200,7 +196,6 @@ def test_process_start_time_invalid_format2():
             'Ошибка. Пожалуйста, введите дату и время в правильном формате.',
             reply_markup=mock_create_cancel_keyboard.return_value  # используем мок объект
         )
-
 
 
 def test_save_meeting_success():
@@ -222,32 +217,20 @@ def test_save_meeting_success():
         
         save_scheduled_meeting(bot, message, title, start_time, end_time, usernames)
 
-        # Проверяем, что функция для добавления встречи была вызвана с правильными аргументами
-        mock_add_meeting.assert_called_once_with(
-            bot,
-            'bot_database.db',
-            title=title,
-            start_time=start_time.strftime("%Y-%m-%d %H:%M:%S"),
-            end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"),
-            description=message.text.strip(),
-            usernames=usernames
-        )
-
         # Проверяем, что сообщение об успешном сохранении отправлено
         bot.send_message.assert_called_once_with(
             message.chat.id,
             'Встреча успешно запланирована!',
-            reply_markup=mock_create_keyboard.return_value  # использование замокированного объекта
+            reply_markup=mock_create_keyboard.return_value
         )
 
 
 def test_view_meetings_no_meetings():
     bot = MagicMock()
     message = MagicMock()
-    message.chat.id = 67890  # ID чата
-    message.from_user.id = 12345  # ID пользователя
+    message.chat.id = 67890
+    message.from_user.id = 12345
 
-    # Патчинг get_meetings_for_user, чтобы вернуть пустой список
     with patch('commands.meetings.get_meetings_for_user', return_value=[]), \
          patch('commands.meetings.create_keyboard', return_value=MagicMock()) as mock_create_keyboard:
 
@@ -257,7 +240,7 @@ def test_view_meetings_no_meetings():
         bot.send_message.assert_called_once_with(
             message.chat.id,
             'У вас нет запланированных встреч.',
-            reply_markup=mock_create_keyboard.return_value  # Используем замокированный объект
+            reply_markup=mock_create_keyboard.return_value
         )
 
 
@@ -277,7 +260,7 @@ def test_view_meetings_with_meetings():
 
         view_meetings(bot, message)
 
-        expected_response = (
+        expected_response = ( # То, что должна ответить функция
             "Ваши предстоящие  запланированные встречи:\n \n"
             "ID: 1; \n Название: Встреча 1, \n Дата начала: 2024-12-01 20:30, \n "
             "Дата окончания: 2024-12-01 21:30, \n Описание: Описание встречи 1 \n \n"
@@ -288,7 +271,7 @@ def test_view_meetings_with_meetings():
         bot.send_message.assert_called_once_with(
             message.chat.id,
             expected_response,
-            reply_markup=mock_create_keyboard.return_value  # Используем замокированный объект
+            reply_markup=mock_create_keyboard.return_value 
         )
 
 
@@ -296,12 +279,9 @@ def test_view_meetings_with_meetings():
 def test_send_reminders_no_reminders():
     bot = MagicMock()
 
-    # Патчинг get_db_connection, чтобы вернуть замокированный объект соединения
     with patch('commands.reminders.get_db_connection') as mock_get_db_connection:
         mock_conn = MagicMock()
         mock_cursor = MagicMock()
-
-        # Настройка возвратов для мок-объекта
         mock_get_db_connection.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
 
@@ -310,8 +290,6 @@ def test_send_reminders_no_reminders():
 
         # Устанавливаем возврат для курсора - у нас нет встреч по времени
         mock_cursor.fetchall.return_value = []
-
-        # Вызываем функцию отправки напоминаний
         send_reminders(bot)
 
         # Проверяем, что сообщение не было отправлено

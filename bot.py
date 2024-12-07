@@ -14,6 +14,7 @@ from commands.stats import generate_monthly_stats_plot
 from commands.reminders import schedule_reminder_check 
 from commands.help import create_keyboard
 from google_auth import *
+# Импортируем все, что можно
 
 
 
@@ -22,7 +23,9 @@ TOKEN = os.getenv("TOKEN")
 
 bot = telebot.TeleBot(TOKEN) # Спрятали токен
 
-schedule_reminder_check(bot)
+schedule_reminder_check(bot) # Запустили отправление напоминалок
+
+# Хендлеры
 
 @bot.message_handler(commands=['cancel'])
 def start_handler(message):
@@ -39,7 +42,6 @@ def help_command(message):
     keyboard = create_keyboard() 
     help_command_handler(message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
-
 
 @bot.message_handler(commands=['register'])
 def register_command(message):
@@ -79,6 +81,7 @@ def show_stats(message):
     keyboard = create_keyboard() 
     generate_monthly_stats_plot(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
+
 
 @bot.message_handler(commands=['google_authentication'])
 def authenticate_user(message):

@@ -5,11 +5,11 @@ import matplotlib
 import matplotlib.pyplot as plt
 from .utils import get_db_connection
 
-matplotlib.use('Agg')  # Используем бекенд без GUI
+matplotlib.use('Agg')
 
 def calculate_average_meeting_duration(first_day, last_day):
     """Вычисляет среднюю длительность встреч за заданный период."""
-    conn = get_db_connection('bot_database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Запрос на получение начала и конца встреч за указанный период
@@ -20,23 +20,23 @@ def calculate_average_meeting_duration(first_day, last_day):
 
     meetings = cursor.fetchall()
     
-    total_duration = datetime.timedelta()
-    meeting_count = len(meetings)
+    total_duration = datetime.timedelta() # Общая длина встреч за месяц
+    meeting_count = len(meetings) # Сколько встреч в этом месяце
 
     for start, end in meetings:
         start_dt = datetime.datetime.strptime(start, "%Y-%m-%d %H:%M:%S")
         end_dt = datetime.datetime.strptime(end, "%Y-%m-%d %H:%M:%S")
-        total_duration += (end_dt - start_dt)
+        total_duration += (end_dt - start_dt) # К общему времени прибавляем длину каждой встречи
     
     close_connection(conn)
     average_duration_minutes = (total_duration.total_seconds() / 60) / meeting_count if meeting_count > 0 else 0
-    total_duration = (total_duration.total_seconds() / 60) 
+    total_duration = (total_duration.total_seconds() / 60) # Перевод в минуты
 
     return round(average_duration_minutes, 1), meeting_count, int(total_duration)
 
 def generate_monthly_stats_plot(bot, message):
     """Генерирует график с количеством встреч за текущий месяц."""
-    conn = get_db_connection('bot_database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Определяем первый и последний день текущего месяца
@@ -69,17 +69,15 @@ def generate_monthly_stats_plot(bot, message):
     plt.ylabel('Количество встреч')
     plt.xticks(range(1, last_day_of_month.day + 1))
 
-    # Сохранение графика в память
+    # Сохраняем графика
     img = io.BytesIO()
     plt.savefig(img, format='png')
     img.seek(0)
-    plt.close()  # Закрываем фигуру после сохранения
+    plt.close() 
 
     close_connection(conn)
-    
     
     bot.send_photo(message.chat.id, img.getvalue(), caption=f"Количество встреч за текущий месяц по дням.\nВаше общее количество встреч: {meeting_count}.\nВаше среднее время встречи: {average_meeting_duration} минут.\nВаше общее время встреч: {total_meeting_time} минут.")
 
 def close_connection(conn):
-    """Закрывает соединение с базой данных."""
     conn.close()

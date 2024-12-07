@@ -1,23 +1,24 @@
 from .utils import get_db_connection
 
 def register_user(bot, message):
-    conn = get_db_connection('bot_database.db')
+    """Регистрация пользователя"""
+    conn = get_db_connection()
     cursor = conn.cursor()
     
     us_id = message.from_user.id
-    username = message.from_user.username or message.from_user.first_name
+    username = message.from_user.username or message.from_user.first_name # Получили тг юзернейм и id
     
-    cursor.execute('SELECT * FROM users WHERE user_id = ?', (us_id,))
+    cursor.execute('SELECT * FROM users WHERE user_id = ?', (us_id,)) # Проверяем, нет ли этого пользователя в базе
     if cursor.fetchone() is not None:
         bot.send_message(message.chat.id, 'Вы уже зарегистрированы в базе данных.')
-    else:
+    else: # Если нет, то записываем
         cursor.execute('INSERT INTO users (user_id, username) VALUES (?, ?)', (us_id, username))
         conn.commit()
         bot.send_message(message.chat.id, 'Вы успешно добавлены в базу данных!')
 
 def view_users(bot, message):
     """Отображение всех пользователей в базе данных."""
-    conn = get_db_connection('bot_database.db')
+    conn = get_db_connection()
     cursor = conn.cursor()
 
     # Запрос всех пользователей
