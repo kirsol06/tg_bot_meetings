@@ -3,7 +3,7 @@ import datetime
 
 def get_db_connection():
     """Открывает и возвращает новое соединение с базой данных."""
-    return sqlite3.connect('bot_database.db')
+    return sqlite3.connect('bot_database2.db')
 
 def get_meetings_for_user(user_id):
     conn = get_db_connection()
@@ -79,14 +79,28 @@ def all_usernames_exist(usernames):
 
 def send_meeting_notification(bot, user_id, title, start_time, end_time, description):
     """Отправка уведомления пользователю о назначенной встрече."""
+    start_time = start_time.split()
+    s_time = start_time[1]
+    s_date = start_time[0]
+    s_date = s_date[8:] + '-' + s_date[5:7] + '-' + s_date[0:4]
+    start_time = s_date + ' ' + s_time[:-3]
+
+    end_time = end_time.split()
+    e_time = end_time[1]
+    e_date = end_time[0]
+    e_date = e_date[8:] + '-' + e_date[5:7] + '-' + e_date[0:4]
+    end_time = e_date + ' ' + e_time[:-3]
+    
     message = (
         f"🔥 Вам назначена новая встреча!\n"
         f"Название: {title}\n"
-        f"Дата и время начала: {start_time[:-3]}\n"
-        f"Дата и время окончания: {end_time[:-3]}\n"
+        f"Дата и время начала: {start_time}\n"
+        f"Дата и время окончания: {end_time}\n"
         f"Описание: {description}\n"
+        f"Эта встреча появится в вашем гугл-календаре в течение минуты"
     )
     bot.send_message(user_id, message)
+
 
 
 def add_meeting(bot, title: str, start_time: str, end_time: str, description: str, usernames: list):
@@ -110,4 +124,47 @@ def add_meeting(bot, title: str, start_time: str, end_time: str, description: st
     conn.commit()
     conn.close() 
 
+
+def get_last_meeting_for_user(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # Получаем текущее время
+    now = datetime.datetime.now()
+
+    # Извлечение встречи с самым большим id у участников
+    cursor.execute("""
+        SELECT m.id, m.title, m.start_time, m.end_time, m.description
+        FROM meetings m
+        WHERE m.id = (
+            SELECT MAX(m.id)
+            FROM meetings m
+            JOIN participants p ON m.id = p.meeting_id
+            WHERE p.user_id = ? AND m.start_time > ?
+        )
+    """, (user_id, now))
+
+    meeting = cursor.fetchone()  # Получаем только одну запись с самым большим id
+    conn.close()
+
+    return meeting
+
+def get_user_email(user_id):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT email FROM users WHERE user_id = ?", (user_id,))
+    email = cursor.fetchone()
+    
+    conn.close()
+    return email
+
+def get_participants(meeting):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT user_id FROM participants WHERE meeting_id = ?", (meeting[0],))
+    participants = cursor.fetchall()
+    conn.close()
+
+    return [pid[0] for pid in participants]  # Извлекаем user_id из кортежей
 

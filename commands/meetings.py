@@ -4,7 +4,7 @@ import datetime
 
 def set_schedule_meeting(bot, message):
     """Обработка команды для назначения встречи на определенное время."""
-    bot.send_message(message.chat.id, 'Введите дату и время начала встречи в формате "YYYY-MM-DD HH:MM" (например, 2024-12-01 20:30).', reply_markup=create_cancel_keyboard())
+    bot.send_message(message.chat.id, 'Введите дату и время начала встречи в формате "DD-MM-YYYY HH:MM" (например, 01-12-2024 20:30).', reply_markup=create_cancel_keyboard())
     bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg)) # следующий шаг - функция process_scheduled_start_time
 
 def process_scheduled_start_time(bot, message):
@@ -15,32 +15,32 @@ def process_scheduled_start_time(bot, message):
         return
     try:
         start_time_str = message.text.strip()
-        start_time = datetime.datetime.strptime(start_time_str, "%Y-%m-%d %H:%M")
+        start_time = datetime.datetime.strptime(start_time_str, "%d-%m-%Y %H:%M")
         
-        # Запрашиваем время конца встречи
-        bot.send_message(message.chat.id, 'Введите время окончания встречи в формате НН:ММ (например, 21:30).', reply_markup=create_cancel_keyboard())
-        bot.register_next_step_handler(message, lambda msg: process_scheduled_end_time(bot, msg, start_time))
+        # Запрашиваем длительность встречи
+        bot.send_message(message.chat.id, 'Введите длительность встречи в минутах.', reply_markup=create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: process_scheduled_duration(bot, msg, start_time))
         
     except ValueError:
         bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите дату и время в правильном формате.', reply_markup=create_cancel_keyboard())
         bot.register_next_step_handler(message, lambda msg: process_scheduled_start_time(bot, msg))
 
-def process_scheduled_end_time(bot, message, start_time):
-    """Обработка времени окончания встречи."""
+def process_scheduled_duration(bot, message, start_time):
+    """Обработка длительности встречи"""
     if message.text.strip() == '/cancel':
         keyboard = create_keyboard() 
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
     try:
-        end_time_str = message.text.strip()
-        end_time = datetime.datetime.strptime(end_time_str, "%H:%M")
+        duration = int(message.text.strip())
+        end_time = start_time + datetime.timedelta(minutes=duration)
         
         # Создаем полное время окончания, использовав дату начала
         end_time = end_time.replace(year=start_time.year, month=start_time.month, day=start_time.day)
         
         if end_time <= start_time:
             bot.send_message(message.chat.id, 'Ошибка. Время окончания встречи должно быть позже времени начала. Попробуйте снова.', reply_markup=create_cancel_keyboard())
-            bot.register_next_step_handler(message, lambda msg: process_scheduled_end_time(bot, msg, start_time))
+            bot.register_next_step_handler(message, lambda msg: process_scheduled_duration(bot, msg, start_time))
             return
 
         # Запрашиваем юзернеймы участников
@@ -48,8 +48,8 @@ def process_scheduled_end_time(bot, message, start_time):
         bot.register_next_step_handler(message, lambda msg: process_usernames(bot, msg, start_time, end_time))
 
     except ValueError:
-        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите время окончания в правильном формате (HH:MM).', reply_markup=create_cancel_keyboard())
-        bot.register_next_step_handler(message, lambda msg: process_scheduled_end_time(bot, msg, start_time))
+        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите время в правильном формате.', reply_markup=create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: process_scheduled_duration(bot, msg, start_time))
 
 def process_usernames(bot, message, start_time, end_time):
     """Обработка юзернеймов участников встречи."""
@@ -103,8 +103,8 @@ def save_scheduled_meeting(bot, message, title, start_time, end_time, usernames)
                     end_time=end_time.strftime("%Y-%m-%d %H:%M:%S"),
                     description=description,
                     usernames=usernames)
-
         bot.send_message(message.chat.id, 'Встреча успешно запланирована!', reply_markup = create_keyboard())
+
     except Exception as e:
         bot.send_message(message.chat.id, 'Ошибка при сохранении встречи. Пожалуйста, попробуйте снова.', reply_markup=create_cancel_keyboard())
         print(f"Ошибка при сохранении встречи: {e}")  # Для отладки
@@ -121,6 +121,18 @@ def view_meetings(bot, message):
     else:
         user_response = 'Ваши предстоящие  запланированные встречи:\n \n'
         for meeting_id, title, start_time, end_time, description in user_meetings:
+            start_time = start_time.split()
+            s_time = start_time[1]
+            s_date = start_time[0]
+            s_date = s_date[8:] + '-' + s_date[5:7] + '-' + s_date[0:4]
+            start_time = s_date + ' ' + s_time[:-3]
+
+            end_time = end_time.split()
+            e_time = end_time[1]
+            e_date = end_time[0]
+            e_date = e_date[8:] + '-' + e_date[5:7] + '-' + e_date[0:4]
+            end_time = e_date + ' ' + e_time[:-3]
+            
             user_response += f"ID: {meeting_id}; \n Название: {title}, \n Дата начала: {start_time[:-3]}, \n Дата окончания: {end_time[:-3]}, \n Описание: {description} \n \n"
         bot.send_message(message.chat.id, user_response, reply_markup = create_keyboard())
 
@@ -128,68 +140,72 @@ def view_meetings(bot, message):
 def set_free_meeting(bot, message):
     """Обработка команды для нахождения свободного времени для встречи."""
     bot.send_message(message.chat.id, 'Введите usernames участников, которых вы хотите пригласить (через запятую). Если вы тоже участник встречи, то свой юзернейм тоже надо ввести', reply_markup=create_cancel_keyboard())
-    bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
+    bot.register_next_step_handler(message, lambda msg: check_users(bot, msg))
 
-def add_free_users(bot, message):
+def check_users(bot, message):
     """Поиск ближайшего свободного слота для встречи."""
     if message.text.strip() == '/cancel':
         keyboard = create_keyboard() 
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
-    
     # Проверка на существование юзеров в базе
     usernames = [username.strip() for username in message.text.split(',')]
     if not all_usernames_exist(usernames):
         bot.send_message(message.chat.id, 'Некоторые из указанных юзернеймов не найдены в базе данных. Пожалуйста, повторите ввод.', reply_markup=create_cancel_keyboard())
-        bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg))
+        bot.register_next_step_handler(message, lambda msg: check_users(bot, msg))
         return
-    
-    all_meetings = []
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    # Достаем все будущие встречи для желаемых участников
-    for username in usernames:
-        cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
-        user = cursor.fetchone()
-        if user:
-            user_id = user[0]
-            meetings = get_meetings_for_user(user_id)
-            all_meetings.extend(meetings)
-    
-    conn.close() 
-    
-    bot.send_message(message.chat.id, 'Введите желаемую дату (YYYY-MM-DD), самое раннее время начала (HH-MM) и длительность встречи в минутах через пробел (например: 2024-12-03 12:00 50)', reply_markup=create_cancel_keyboard())
-    bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, all_meetings, usernames, msg))
+    bot.send_message(message.chat.id, 'Введите желаемую дату (DD-MM-YYY) и самое раннее время начала (HH:MM) через пробел (например: 01-12-2024 12:00)', reply_markup=create_cancel_keyboard())
+    bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg, usernames))
 
-
-def find_free_slot(bot, all_meetings, usernames, message):
-    """Функция для поиска свободного слота в соответствии с указанным временем и участниками"""
+ 
+def add_free_users(bot, message, usernames):
     if message.text.strip() == '/cancel':
         keyboard = create_keyboard() 
         bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
         return
-    
     try:
-        data = message.text.split()
-        if len(data) != 3:
-            raise ValueError
-        date = data[0].strip()
-        time = data[1].strip()
-        duration = int(data[2].strip())
-        datetime_str = f"{date} {time}"
+        start_time_str = message.text.strip()
+        start_time = datetime.datetime.strptime(start_time_str, "%d-%m-%Y %H:%M")
+        all_meetings = []
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        # Достаем все будущие встречи для желаемых участников
+        for username in usernames:
+            cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
+            user = cursor.fetchone()
+            if user:
+                user_id = user[0]
+                meetings = get_meetings_for_user(user_id)
+                all_meetings.extend(meetings)
+        conn.close()
+        # Запрашиваем длительность встречи
+        bot.send_message(message.chat.id, 'Введите длительность встречи в минутах.', reply_markup=create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: get_duration_free(bot, msg, usernames, start_time, all_meetings))
         
-        start_time = datetime.datetime.strptime(datetime_str, "%Y-%m-%d %H:%M")
-        
-        next_free_slot = find_nearest_free_time(all_meetings, duration, start_time) 
+    except ValueError:
+        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите время в правильном формате.', reply_markup=create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: add_free_users(bot, msg, usernames))
+    
 
+
+def get_duration_free (bot, message, usernames, start_time, all_meetings):
+    if message.text.strip() == '/cancel':
+        keyboard = create_keyboard() 
+        bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
+        return
+    try:
+        duration = int(message.text.strip())
+        """ для поиска свободного слота в соответствии с указанным временем и участниками"""
+        next_free_slot = find_nearest_free_time(all_meetings, duration, start_time) 
         if next_free_slot:
-            response = f'Ближайшее свободное время для встречи: {next_free_slot.strftime("%Y-%m-%d %H:%M")}. ' \
+            response = f'Ближайшее свободное время для встречи: {next_free_slot.strftime("%d-%m-%Y %H:%M")}. ' \
                     'Хотите запланировать встречу на это время? (да/нет)'
             bot.send_message(message.chat.id, response, reply_markup = create_yes_no_keyboard())
             bot.register_next_step_handler(message, lambda msg: confirm_free_meeting(bot, msg, next_free_slot, usernames, duration))
     except ValueError:
-        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите дату и время в правильном формате.', reply_markup=create_cancel_keyboard())
-        bot.register_next_step_handler(message, lambda msg: find_free_slot(bot, all_meetings, usernames, msg))
+        bot.send_message(message.chat.id, 'Ошибка. Пожалуйста, введите время в правильном формате.', reply_markup=create_cancel_keyboard())
+        bot.register_next_step_handler(message, lambda msg: get_duration_free(bot, msg, usernames, start_time, all_meetings))
+
 
 def confirm_free_meeting(bot, message, next_free_slot, usernames, duration):
     """Обработка согласия на назначение встречи."""
@@ -256,13 +272,15 @@ def delete_meeting_handler(bot, message):
             bot.send_message(message.chat.id, 'Встреча с таким ID не найдена, повторите ввод.', reply_markup = create_cancel_keyboard())
             bot.register_next_step_handler(message, lambda msg: delete_meeting_handler(bot, msg))
             return
-
+        
         cursor.execute('DELETE FROM meetings WHERE id = ?', (meeting_id,))
         cursor.execute('DELETE FROM participants WHERE meeting_id = ?', (meeting_id,))  # Удаляем участников
         conn.commit()
-
-        bot.send_message(message.chat.id, 'Встреча успешно удалена!', reply_markup = create_keyboard())
+               
+        bot.send_message(message.chat.id, 'Встреча успешно удалена! Она исчезнет из вашего гугл-календаря в течение минуты', reply_markup = create_keyboard())
         conn.close()
+        
+        return
 
     except ValueError:
         bot.send_message(message.chat.id, 'Введите корректный ID встречи.', reply_markup = create_cancel_keyboard())

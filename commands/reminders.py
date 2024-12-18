@@ -24,6 +24,11 @@ def send_reminders(bot):
     conn.close()
     for meeting_id, title, start_time, end_time, description, user_id in meetings:
         if meeting_id not in sent_reminders: # Если еще не напоминали, то делаем
+            start_time = start_time.split()
+            s_time = start_time[1]
+            s_date = start_time[0]
+            date = s_date[8:] + '-' + s_date[5:7] + '-' + s_date[0:4]
+            start_time = date + ' ' + s_time[:-3]
             message = (
                 f"🔔 Напоминание о встрече!\n"
                 f"Название: {title}\n"
