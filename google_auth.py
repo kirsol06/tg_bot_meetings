@@ -70,9 +70,10 @@ def get_events(creds):
 
 def create_event(creds, meeting):
     """Создание события в Google Calendar."""
-    url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events'
-    start_time = datetime.fromisoformat(meeting[2]).isoformat() + 'Z'
-    end_time = datetime.fromisoformat(meeting[3]).isoformat() + 'Z'
+    url = 'https://www.googleapis.com/calendar/v3/calendars/primary/events?sendUpdates=all'
+
+    start_time = datetime.fromisoformat(meeting[2]).isoformat()
+    end_time = datetime.fromisoformat(meeting[3]).isoformat()
     
     participant_ids = get_participants(meeting)
     print(participant_ids)
