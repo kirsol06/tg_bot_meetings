@@ -133,7 +133,7 @@ def view_meetings(bot, message):
             e_date = e_date[8:] + '-' + e_date[5:7] + '-' + e_date[0:4]
             end_time = e_date + ' ' + e_time[:-3]
             
-            user_response += f"ID: {meeting_id}; \n Название: {title}, \n Дата начала: {start_time[:-3]}, \n Дата окончания: {end_time[:-3]}, \n Описание: {description} \n \n"
+            user_response += f"ID: {meeting_id}; \n Название: {title}, \n Дата начала: {start_time}, \n Дата окончания: {end_time}, \n Описание: {description} \n \n"
         bot.send_message(message.chat.id, user_response, reply_markup = create_keyboard())
 
 

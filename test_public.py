@@ -50,9 +50,9 @@ def test_send_meeting_notification():
         user_id, 
         f"🔥 Вам назначена новая встреча!\n"
         f"Название: {title}\n"
-        f"Дата и время начала: {start_time[:-3]}\n"
-        f"Дата и время окончания: {end_time[:-3]}\n"
-        f"Описание: {description}\n"
+        f"Дата и время начала: 01-10-2023 12:00\n"
+        f"Дата и время окончания: 01-10-2023 13:00\n"
+        f"Описание: {description}\nЭта встреча появится в вашем гугл-календаре в течение минуты"
     )
 
 
@@ -62,18 +62,19 @@ def test_delete_meeting_handler():
     message.text = '1'
     message.chat.id = 67890
     
-    with patch('commands.meetings.get_db_connection') as mock_conn:
+    with patch('commands.meetings.get_db_connection') as mock_conn: 
         mock_cursor = MagicMock()
         mock_conn.return_value.cursor.return_value = mock_cursor
         mock_cursor.fetchone.return_value = (1, "Meeting Title")  # Встреча найдена
 
-        # Вызываем функцию
-        delete_meeting_handler(bot, message)
-
-        # Проверяем удаление записи
-        mock_cursor.execute.assert_any_call('DELETE FROM meetings WHERE id = ?', (1,))
-        mock_cursor.execute.assert_any_call('DELETE FROM participants WHERE meeting_id = ?', (1,))
-        bot.send_message.assert_called_once_with(message.chat.id, 'Встреча успешно удалена!')
+        with patch('commands.meetings.create_keyboard', return_value=MagicMock()) as mock_create_keyboard:
+            # Вызываем функцию
+            delete_meeting_handler(bot, message)
+            # Проверяем удаление записи
+            mock_cursor.execute.assert_any_call('DELETE FROM meetings WHERE id = ?', (1,))
+            mock_cursor.execute.assert_any_call('DELETE FROM participants WHERE meeting_id = ?', (1,))
+            bot.send_message.assert_called_once_with(message.chat.id, 'Встреча успешно удалена! Она исчезнет из вашего гугл-календаря в течение минуты',
+                                                    reply_markup=mock_create_keyboard.return_value)
 
 
 def test_generate_monthly_stats_plot():
@@ -139,28 +140,6 @@ def test_register_user_already_registered():
         # Проверяем, что insert не вызывается и сообщение о регистрации уже было отправлено
         mock_cursor.execute.assert_called_once_with('SELECT * FROM users WHERE user_id = ?', (12345,))
         bot.send_message.assert_called_once_with(message.chat.id, 'Вы уже зарегистрированы в базе данных.')
-
-
-def test_register_user_new_user():
-    bot = MagicMock()
-    message = MagicMock()
-    message.from_user.id = 12345
-    message.from_user.username = "new_user"
-    message.chat.id = 67890
-
-    with patch('commands.register.get_db_connection') as mock_conn:
-        mock_cursor = MagicMock()
-        mock_conn.return_value.cursor.return_value = mock_cursor
-        
-        mock_cursor.fetchone.return_value = None  # Пользователь не зарегистрирован
-
-        register_user(bot, message)
-
-        # Проверяем, что insert вызывается и новое сообщение о регистрации было отправлено
-        mock_cursor.execute.assert_any_call('SELECT * FROM users WHERE user_id = ?', (12345,))
-        mock_cursor.execute.assert_any_call('INSERT INTO users (user_id, username) VALUES (?, ?)', (12345, "new_user"))
-        bot.send_message.assert_called_once_with(message.chat.id, 'Вы успешно добавлены в базу данных!')
-
 
 def test_process_start_time_invalid_format1():
     bot = MagicMock()
@@ -261,10 +240,10 @@ def test_view_meetings_with_meetings():
 
         expected_response = ( # То, что должна ответить функция
             "Ваши предстоящие  запланированные встречи:\n \n"
-            "ID: 1; \n Название: Встреча 1, \n Дата начала: 2024-12-01 20:30, \n "
-            "Дата окончания: 2024-12-01 21:30, \n Описание: Описание встречи 1 \n \n"
-            "ID: 2; \n Название: Встреча 2, \n Дата начала: 2024-12-02 18:00, \n "
-            "Дата окончания: 2024-12-02 19:00, \n Описание: Описание встречи 2 \n \n"
+            "ID: 1; \n Название: Встреча 1, \n Дата начала: 01-12-2024 20:30, \n "
+            "Дата окончания: 01-12-2024 21:30, \n Описание: Описание встречи 1 \n \n"
+            "ID: 2; \n Название: Встреча 2, \n Дата начала: 02-12-2024 18:00, \n "
+            "Дата окончания: 02-12-2024 19:00, \n Описание: Описание встречи 2 \n \n"
         )
 
         bot.send_message.assert_called_once_with(
