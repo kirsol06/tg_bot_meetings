@@ -42,8 +42,6 @@ def authenticate_user(bot, message):
             bot.register_next_step_handler(message, lambda msg: authenticate_user(msg))
     else:
         bot.send_message(message.chat.id, "Вы успешно аутентифицированы! Синхронизация встреч запущена", reply_markup=create_keyboard())
-        #sync_events(user_id)  # Ваша функция синхронизации
-        #threading.Timer(60, start_sync_events, [bot, user_id]).start() 
 
 def handle_code(bot, message):
     user_id = message.from_user.id
