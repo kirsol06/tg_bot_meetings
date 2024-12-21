@@ -31,7 +31,6 @@ def start_handler(message):
     keyboard = create_keyboard() 
     bot.send_message(message.chat.id, 'Отмена', reply_markup=keyboard)
     user_id = message.from_user.id 
-    start_sync_events(bot, user_id)
 
 @bot.message_handler(commands=['start'])
 def start_handler(message):
@@ -42,8 +41,6 @@ def help_command(message):
     keyboard = create_keyboard() 
     help_command_handler(message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
-    user_id = message.from_user.id 
-    start_sync_events(bot, user_id)
 
 @bot.message_handler(commands=['register'])
 def register_command(message):
@@ -60,16 +57,14 @@ def view_meetings_command(message):
     keyboard = create_keyboard() 
     view_meetings(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
-    user_id = message.from_user.id 
-    start_sync_events(bot, user_id)
+
 
 @bot.message_handler(commands=['view_users'])
 def view_users_command(message):
     keyboard = create_keyboard() 
     view_users(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
-    user_id = message.from_user.id 
-    start_sync_events(bot, user_id)
+
 
 @bot.message_handler(commands=['delete_meeting'])
 def delete_meeting_command_handler(message):
@@ -88,8 +83,6 @@ def show_stats(message):
     keyboard = create_keyboard() 
     generate_monthly_stats_plot(bot, message)
     bot.send_message(message.chat.id, "Выберите команду:", reply_markup=keyboard)
-    user_id = message.from_user.id 
-    start_sync_events(bot, user_id)
 
 
 if __name__ == '__main__':

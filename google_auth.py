@@ -156,4 +156,4 @@ def token_exists(bot, message, user_id):
 
 def start_sync_events(bot, user_id):
     sync_events(user_id)  # Ваша функция синхронизации
-    threading.Timer(60, start_sync_events, [bot, user_id]).start()
+    threading.Timer(90, start_sync_events, [bot, user_id]).start()
